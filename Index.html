@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roboflow Custom Annotator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: white;
+            margin: 0;
+        }
+        .content {
+            display: flex;
+            gap: 20px;
+        }
+        .canvas-container {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+        .sidebar {
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .canvas-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-danger {
+            background-color: #f44336;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        .btn-secondary {
+            background-color: #2196F3;
+        }
+        .btn-secondary:hover {
+            background-color: #0b7dda;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .annotations-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .annotation-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .status-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <h1>Roboflow Custom Annotator</h1>
+        </div>
+        
+        <div class="content">
+            <div class="canvas-container">
+                <div class="canvas-wrapper">
+                    <canvas id="canvas" width="800" height="600"></canvas>
+                </div>
+                <div class="btn-group">
+                    <button id="draw-rect" class="btn">Draw Box</button>
+                    <button id="draw-circle" class="btn">Draw Circle</button>
+                    <button id="draw-triangle" class="btn">Draw Triangle</button>
+                    <button id="draw-line" class="btn">Draw Line</button>
+                    <button id="delete-selected" class="btn btn-danger">Delete Selected</button>
+                    <button id="clear-all" class="btn btn-danger">Clear All</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="form-group">
+                    <label for="image-source">Image Source:</label>
+                    <select id="image-source">
+                        <option value="roboflow">Roboflow Dataset</option>
+                        <option value="local">Local Computer</option>
+                        <option value="url">URL / API Endpoint</option>
+                        <option value="cloud">Cloud Storage</option>
+                    </select>
+                </div>
+                
+                <!-- Roboflow fields -->
+                <div id="roboflow-fields">
+                    <div class="form-group">
+                        <label for="api-key">Roboflow API Key:</label>
+                        <input type="text" id="api-key" placeholder="Enter your Roboflow API key">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dataset-id">Dataset ID:</label>
+                        <input type="text" id="dataset-id" placeholder="Enter dataset ID">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="image-id">Image ID:</label>
+                        <input type="text" id="image-id" placeholder="Enter image ID">
+                    </div>
+                </div>
+                
+                <!-- URL fields -->
+                <div id="url-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="image-url">Image URL:</label>
+                        <input type="text" id="image-url" placeholder="Enter image URL">
+                    </div>
+                </div>
+                
+                <!-- Local file upload -->
+                <div id="local-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="local-file">Choose File:</label>
+                        <input type="file" id="local-file" accept="image/*">
+                    </div>
+                </div>
+                
+                <!-- Cloud storage options -->
+                <div id="cloud-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="cloud-provider">Cloud Provider:</label>
+                        <select id="cloud-provider">
+                            <option value="dropbox">Dropbox</option>
+                            <option value="onedrive">OneDrive</option>
+                            <option value="gdrive">Google Drive</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button id="connect-cloud" class="btn btn-secondary">Connect to Cloud</button>
+                    </div>
+                    <div id="cloud-status" class="status-message"></div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="load-image" class="btn btn-secondary">Load Image</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="class-select">Object Class:</label>
+                    <select id="class-select">
+                        <option value="person">Person</option>
+                        <option value="car">Car</option>
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                        <!-- Add more classes as needed -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Annotations:</label>
+                    <div class="annotations-list" id="annotations-list"></div>
+                </div>
+                
+                <button id="save-annotations" class="btn">Save Annotations</button>
+                
+                <div id="status-message" class="status-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Fabric.js canvas
+            const canvas = new fabric.Canvas('canvas', {
+                selection: true
+            });
+            
+            let drawingMode = false;
+            let currentShape = null;
+            let startX, startY;
+            let activeShape = null;
+            let annotations = [];
+            
+            // DOM elements
+            const drawRectBtn = document.getElementById('draw-rect');
+            const deleteSelectedBtn = document.getElementById('delete-selected');
+            const clearAllBtn = document.getElementById('clear-all');
+            const loadImageBtn = document.getElementById('load-image');
+            const saveAnnotationsBtn = document.getElementById('save-annotations');
+            const apiKeyInput = document.getElementById('api-key');
+            const datasetIdInput = document.getElementById('dataset-id');
+            const imageIdInput = document.getElementById('image-id');
+            const classSelect = document.getElementById('class-select');
+            const annotationsList = document.getElementById('annotations-list');
+            const statusMessage = document.getElementById('status-message');
+            const imageSourceSelect = document.getElementById('image-source');
+            const localFileInput = document.getElementById('local-file');
+            const imageUrlInput = document.getElementById('image-url');
+            const cloudProviderSelect = document.getElementById('cloud-provider');
+            const connectCloudBtn = document.getElementById('connect-cloud');
+            
+            // Source selection fields
+            const sourceFields = {
+                roboflow: document.getElementById('roboflow-fields'),
+                local: document.getElementById('local-fields'),
+                url: document.getElementById('url-fields'),
+                cloud: document.getElementById('cloud-fields')
+            };
+            
+            // Handle changing image source type
+            imageSourceSelect.addEventListener('change', function() {
+                // Hide all source fields
+                Object.values(sourceFields).forEach(field => {
+                    field.style.display = 'none';
+                });
+                
+                // Show the selected source fields
+                const selectedSource = this.value;
+                if (sourceFields[selectedSource]) {
+                    sourceFields[selectedSource].style.display = 'block';
+                }
+            });
+            
+            // Button event listeners
+            drawRectBtn.addEventListener('click', () => toggleDrawingMode('rectangle'));
+            document.getElementById('draw-circle').addEventListener('click', () => toggleDrawingMode('circle'));
+            document.getElementById('draw-triangle').addEventListener('click', () => toggleDrawingMode('triangle'));
+            document.getElementById('draw-line').addEventListener('click', () => toggleDrawingMode('line'));
+            deleteSelectedBtn.addEventListener('click', deleteSelected);
+            clearAllBtn.addEventListener('click', clearAll);
+            loadImageBtn.addEventListener('click', loadImage);
+            saveAnnotationsBtn.addEventListener('click', saveAnnotations);
+            connectCloudBtn.addEventListener('click', connectToCloudStorage);
+            
+            // File input listener
+            localFileInput.addEventListener('change', handleLocalFileSelect);
+            
+            // Canvas event listeners for drawing rectangles
+            canvas.on('mouse:down', onMouseDown);
+            canvas.on('mouse:move', onMouseMove);
+            canvas.on('mouse:up', onMouseUp);
+            
+            // Toggle drawing mode
+            function toggleDrawingMode(shape) {
+                // If already in drawing mode with the same shape, turn it off
+                if (drawingMode && currentShape === shape) {
+                    drawingMode = false;
+                    currentShape = null;
+                    resetDrawButtons();
+                    canvas.selection = true;
+                    canvas.defaultCursor = 'default';
+                } else {
+                    // Turn on drawing mode with the selected shape
+                    drawingMode = true;
+                    currentShape = shape;
+                    resetDrawButtons();
+                    
+                    // Highlight the active button
+                    let buttonId;
+                    switch(shape) {
+                        case 'rectangle': buttonId = 'draw-rect'; break;
+                        case 'circle': buttonId = 'draw-circle'; break;
+                        case 'triangle': buttonId = 'draw-triangle'; break;
+                        case 'line': buttonId = 'draw-line'; break;
+                    }
+                    
+                    if (buttonId) {
+                        document.getElementById(buttonId).textContent = `Cancel ${capitalizeFirstLetter(shape)}`;
+                    }
+                    
+                    canvas.selection = false;
+                    canvas.defaultCursor = 'crosshair';
+                }
+            }
+            
+            // Reset all draw buttons to their default text
+            function resetDrawButtons() {
+                document.getElementById('draw-rect').textContent = 'Draw Box';
+                document.getElementById('draw-circle').textContent = 'Draw Circle';
+                document.getElementById('draw-triangle').textContent = 'Draw Triangle';
+                document.getElementById('draw-line').textContent = 'Draw Line';
+            }
+            
+            // Helper function to capitalize first letter
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+            
+            // Mouse down event handler
+            function onMouseDown(options) {
+                if (!drawingMode) return;
+                
+                const pointer = canvas.getPointer(options.e);
+                startX = pointer.x;
+                startY = pointer.y;
+                
+                // Create the appropriate shape based on current mode
+                switch (currentShape) {
+                    case 'rectangle':
+                        activeShape = new fabric.Rect({
+                            left: startX,
+                            top: startY,
+                            width: 0,
+                            height: 0,
+                            stroke: '#2196F3',
+                            strokeWidth: 2,
+                            fill: 'rgba(33, 150, 243, 0.1)',
+                            selectable: true
+                        });
+                        break;
+                        
+                    case 'circle':
+                        activeShape = new fabric.Circle({
+                            left: startX,
+                            top: startY,
+                            radius: 0,
+                            stroke: '#2196F3',
+                            strokeWidth: 2,
+                            fill: 'rgba(33, 150, 243, 0.1)',
+                            selectable: true
+                        });
+                        break;
+                        
+                    case 'triangle':
+                        activeShape = new fabric.Triangle({
+                            left: startX,
+                            top: startY,
+                            width: 0,
+                            height: 0,
+                            stroke: '#2196F3',
+                            strokeWidth: 2,
+                            fill: 'rgba(33, 150, 243, 0.1)',
+                            selectable: true
+                        });
+                        break;
+                        
+                    case 'line':
+                        activeShape = new fabric.Line([startX, startY, startX, startY], {
+                            stroke: '#2196F3',
+                            strokeWidth: 3,
+                            selectable: true
+                        });
+                        break;
+                }
+                
+                if (activeShape) {
+                    canvas.add(activeShape);
+                    canvas.renderAll();
+                }
+            }
+            
+            // Mouse move event handler
+            function onMouseMove(options) {
+                if (!drawingMode || !activeShape) return;
+                
+                const pointer = canvas.getPointer(options.e);
+                
+                switch (currentShape) {
+                    case 'rectangle':
+                        if (startX > pointer.x) {
+                            activeShape.set({ left: pointer.x });
+                        }
+                        
+                        if (startY > pointer.y) {
+                            activeShape.set({ top: pointer.y });
+                        }
+                        
+                        activeShape.set({
+                            width: Math.abs(pointer.x - startX),
+                            height: Math.abs(pointer.y - startY)
+                        });
+                        break;
+                        
+                    case 'circle':
+                        // Calculate radius based on mouse position
+                        const radius = Math.sqrt(
+                            Math.pow(pointer.x - startX, 2) + 
+                            Math.pow(pointer.y - startY, 2)
+                        ) / 2;
+                        
+                        // Calculate center point
+                        const centerX = (startX + pointer.x) / 2;
+                        const centerY = (startY + pointer.y) / 2;
+                        
+                        activeShape.set({
+                            left: centerX - radius,
+                            top: centerY - radius,
+                            radius: radius
+                        });
+                        break;
+                        
+                    case 'triangle':
+                        if (startX > pointer.x) {
+                            activeShape.set({ left: pointer.x });
+                        }
+                        
+                        if (startY > pointer.y) {
+                            activeShape.set({ top: pointer.y });
+                        }
+                        
+                        activeShape.set({
+                            width: Math.abs(pointer.x - startX),
+                            height: Math.abs(pointer.y - startY)
+                        });
+                        break;
+                        
+                    case 'line':
+                        activeShape.set({
+                            x2: pointer.x,
+                            y2: pointer.y
+                        });
+                        break;
+                }
+                
+                canvas.renderAll();
+            }
+            
+            // Mouse up event handler
+            function onMouseUp() {
+                if (!drawingMode || !activeShape) return;
+                
+                let isValidShape = true;
+                let shapeData = {};
+                
+                // Check if shape is valid based on its type
+                switch (currentShape) {
+                    case 'rectangle':
+                        isValidShape = activeShape.width >= 5 && activeShape.height >= 5;
+                        
+                        if (isValidShape) {
+                            shapeData = {
+                                x: activeShape.left / canvas.width,
+                                y: activeShape.top / canvas.height,
+                                width: activeShape.width / canvas.width,
+                                height: activeShape.height / canvas.height
+                            };
+                        }
+                        break;
+                        
+                    case 'circle':
+                        isValidShape = activeShape.radius >= 3;
+                        
+                        if (isValidShape) {
+                            const centerX = activeShape.left + activeShape.radius;
+                            const centerY = activeShape.top + activeShape.radius;
+                            
+                            shapeData = {
+                                x: centerX / canvas.width,
+                                y: centerY / canvas.height,
+                                radius: activeShape.radius / Math.max(canvas.width, canvas.height)
+                            };
+                        }
+                        break;
+                        
+                    case 'triangle':
+                        isValidShape = activeShape.width >= 5 && activeShape.height >= 5;
+                        
+                        if (isValidShape) {
+                            shapeData = {
+                                x: activeShape.left / canvas.width,
+                                y: activeShape.top / canvas.height,
+                                width: activeShape.width / canvas.width,
+                                height: activeShape.height / canvas.height
+                            };
+                        }
+                        break;
+                        
+                    case 'line':
+                        const lineLength = Math.sqrt(
+                            Math.pow(activeShape.x2 - activeShape.x1, 2) + 
+                            Math.pow(activeShape.y2 - activeShape.y1, 2)
+                        );
+                        
+                        isValidShape = lineLength >= 5;
+                        
+                        if (isValidShape) {
+                            shapeData = {
+                                x1: activeShape.x1 / canvas.width,
+                                y1: activeShape.y1 / canvas.height,
+                                x2: activeShape.x2 / canvas.width,
+                                y2: activeShape.y2 / canvas.height
+                            };
+                        }
+                        break;
+                }
+                
+                if (!isValidShape) {
+                    canvas.remove(activeShape);
+                } else {
+                    // Add the annotation data
+                    const selectedClass = classSelect.value;
+                    const annotationId = Date.now().toString();
+                    
+                    // Store annotation data
+                    const annotation = {
+                        id: annotationId,
+                        class: selectedClass,
+                        type: currentShape,
+                        ...shapeData,
+                        shape: activeShape
+                    };
+                    
+                    annotations.push(annotation);
+                    
+                    // Add data to the shape object for reference
+                    activeShape.id = annotationId;
+                    activeShape.class = selectedClass;
+                    activeShape.shapeType = currentShape;
+                    
+                    // Add label to the shape
+                    let labelLeft, labelTop;
+                    
+                    switch (currentShape) {
+                        case 'rectangle':
+                        case 'triangle':
+                            labelLeft = activeShape.left;
+                            labelTop = activeShape.top - 15;
+                            break;
+                        case 'circle':
+                            labelLeft = activeShape.left + activeShape.radius - 20;
+                            labelTop = activeShape.top - 15;
+                            break;
+                        case 'line':
+                            labelLeft = (activeShape.x1 + activeShape.x2) / 2;
+                            labelTop = (activeShape.y1 + activeShape.y2) / 2 - 15;
+                            break;
+                    }
+                    
+                    const label = new fabric.Text(selectedClass, {
+                        left: labelLeft,
+                        top: labelTop,
+                        fontSize: 12,
+                        fill: '#fff',
+                        backgroundColor: '#2196F3',
+                        padding: 5
+                    });
+                    
+                    canvas.add(label);
+                    activeShape.label = label;
+                    
+                    // Update annotations list in the sidebar
+                    updateAnnotationsList();
+                }
+                
+                activeShape = null;
+                toggleDrawingMode(currentShape); // Turn off the current drawing mode
+            }
+            
+                            // Delete selected object
+            function deleteSelected() {
+                const activeObject = canvas.getActiveObject();
+                
+                if (!activeObject) {
+                    setStatus('No object selected', 'error');
+                    return;
+                }
+                
+                if (activeObject.id) {
+                    // Remove from annotations array
+                    annotations = annotations.filter(anno => anno.id !== activeObject.id);
+                    
+                    // Remove label if exists
+                    if (activeObject.label) {
+                        canvas.remove(activeObject.label);
+                    }
+                    
+                    // Remove the shape
+                    canvas.remove(activeObject);
+                    canvas.renderAll();
+                    
+                    // Update annotations list
+                    updateAnnotationsList();
+                    
+                    setStatus('Annotation deleted', 'success');
+                }
+            }
+            
+            // Clear all annotations
+            function clearAll() {
+                canvas.clear();
+                annotations = [];
+                updateAnnotationsList();
+                
+                // If we have a background image, reload it
+                if (window.currentImage) {
+                    fabric.Image.fromURL(window.currentImage, function(img) {
+                        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                            scaleX: canvas.width / img.width,
+                            scaleY: canvas.height / img.height
+                        });
+                    });
+                }
+                
+                setStatus('All annotations cleared', 'success');
+            }
+            
+            // Load image from the selected source
+            function loadImage() {
+                const imageSource = imageSourceSelect.value;
+                
+                // Clear any previous status
+                setStatus('', '');
+                
+                switch (imageSource) {
+                    case 'roboflow':
+                        loadFromRoboflow();
+                        break;
+                    case 'url':
+                        loadFromUrl();
+                        break;
+                    case 'local':
+                        // Local file is already handled by the file input change event
+                        if (!localFileInput.files || localFileInput.files.length === 0) {
+                            setStatus('Please select a file first', 'error');
+                        }
+                        break;
+                    case 'cloud':
+                        loadFromCloud();
+                        break;
+                    default:
+                        setStatus('Please select a valid image source', 'error');
+                }
+            }
+            
+            // Load image from Roboflow API
+            function loadFromRoboflow() {
+                const apiKey = apiKeyInput.value;
+                const datasetId = datasetIdInput.value;
+                const imageId = imageIdInput.value;
+                
+                if (!apiKey || !datasetId || !imageId) {
+                    setStatus('Please provide API key, dataset ID and image ID', 'error');
+                    return;
+                }
+                
+                setStatus('Loading image from Roboflow...', '');
+                
+                // In a real implementation, you would use fetch
+                // Since this is just a demonstration, we'll use a placeholder image
+                const placeholderUrl = '/api/placeholder/800/600';
+                loadImageFromUrl(placeholderUrl);
+                
+                /* This would be the actual fetch code:
+                
+                fetch(`https://api.roboflow.com/dataset/${datasetId}/image/${imageId}?api_key=${apiKey}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load image');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        loadImageFromUrl(url);
+                    })
+                    .catch(error => {
+                        setStatus('Error loading image: ' + error.message, 'error');
+                    });
+                */
+            }
+            
+            // Load image from URL or API endpoint
+            function loadFromUrl() {
+                const imageUrl = imageUrlInput.value;
+                
+                if (!imageUrl) {
+                    setStatus('Please enter an image URL', 'error');
+                    return;
+                }
+                
+                setStatus('Loading image from URL...', '');
+                loadImageFromUrl(imageUrl);
+            }
+            
+            // Handle file selection from local computer
+            function handleLocalFileSelect(event) {
+                const file = event.target.files[0];
+                
+                if (!file) {
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    loadImageFromUrl(e.target.result);
+                };
+                
+                reader.onerror = function() {
+                    setStatus('Error reading file', 'error');
+                };
+                
+                setStatus('Loading local image...', '');
+                reader.readAsDataURL(file);
+            }
+            
+            // Connect to cloud storage
+            function connectToCloudStorage() {
+                const provider = cloudProviderSelect.value;
+                
+                setStatus(`Connecting to ${provider}...`, '');
+                
+                // This is just a placeholder implementation
+                // In a real application, you would implement OAuth2 flow
+                setTimeout(() => {
+                    setStatus(`Connected to ${provider}. Please click "Load Image" to select a file.`, 'success');
+                    
+                    // Here you would typically show a file picker for the selected cloud provider
+                    // For this demo, we'll just use a placeholder
+                }, 1000);
+            }
+            
+            // Load from cloud storage (simplified demonstration)
+            function loadFromCloud() {
+                const provider = cloudProviderSelect.value;
+                
+                // Here you would typically show a file picker from the cloud provider's API
+                // For this demo, we'll just use a placeholder
+                setStatus(`Loading image from ${provider}...`, '');
+                
+                // Use a placeholder image
+                const placeholderUrl = '/api/placeholder/800/600';
+                loadImageFromUrl(placeholderUrl);
+            }
+            
+            // Common function to load an image from a URL
+            function loadImageFromUrl(url) {
+                window.currentImage = url;
+                
+                fabric.Image.fromURL(url, function(img) {
+                    // Clear the canvas first
+                    clearAll();
+                    
+                    // Calculate scaling to fit the canvas while maintaining aspect ratio
+                    const canvasRatio = canvas.width / canvas.height;
+                    const imgRatio = img.width / img.height;
+                    
+                    let scaleX, scaleY;
+                    
+                    if (imgRatio > canvasRatio) {
+                        // Image is wider than canvas (relative to height)
+                        scaleX = canvas.width / img.width;
+                        scaleY = scaleX;
+                    } else {
+                        // Image is taller than canvas (relative to width)
+                        scaleY = canvas.height / img.height;
+                        scaleX = scaleY;
+                    }
+                    
+                    // Set the image as background
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                        scaleX: scaleX,
+                        scaleY: scaleY,
+                        originX: 'left',
+                        originY: 'top'
+                    });
+                    
+                    setStatus('Image loaded successfully', 'success');
+                }, { crossOrigin: 'anonymous' });
+            }
+            
+            // Save annotations to Roboflow
+            function saveAnnotations() {
+                const apiKey = apiKeyInput.value;
+                const datasetId = datasetIdInput.value;
+                const imageId = imageIdInput.value;
+                
+                if (!apiKey || !datasetId || !imageId) {
+                    setStatus('Please provide API key, dataset ID and image ID', 'error');
+                    return;
+                }
+                
+                if (annotations.length === 0) {
+                    setStatus('No annotations to save', 'error');
+                    return;
+                }
+                
+                // Format the annotations for Roboflow
+                const formattedAnnotations = annotations.map(anno => {
+                    const baseAnnotation = {
+                        class: anno.class,
+                        type: anno.type
+                    };
+                    
+                    // Add shape-specific properties
+                    switch (anno.type) {
+                        case 'rectangle':
+                        case 'triangle':
+                            return {
+                                ...baseAnnotation,
+                                x: anno.x,
+                                y: anno.y,
+                                width: anno.width,
+                                height: anno.height
+                            };
+                        case 'circle':
+                            return {
+                                ...baseAnnotation,
+                                x: anno.x,
+                                y: anno.y,
+                                radius: anno.radius
+                            };
+                        case 'line':
+                            return {
+                                ...baseAnnotation,
+                                x1: anno.x1,
+                                y1: anno.y1,
+                                x2: anno.x2,
+                                y2: anno.y2
+                            };
+                        default:
+                            return baseAnnotation;
+                    }
+                });
+                
+                const payload = {
+                    annotations: formattedAnnotations
+                };
+                
+                // Display the payload in the status message for demonstration
+                setStatus('Annotations would be sent to Roboflow: ' + JSON.stringify(payload), 'success');
+                
+                /* This would be the actual fetch code:
+                
+                fetch(`https://api.roboflow.com/dataset/${datasetId}/image/${imageId}/annotation?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to save annotations');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        setStatus('Annotations saved successfully', 'success');
+                    })
+                    .catch(error => {
+                        setStatus('Error saving annotations: ' + error.message, 'error');
+                    });
+                */
+            }
+            
+            // Update the annotations list in the sidebar
+            function updateAnnotationsList() {
+                annotationsList.innerHTML = '';
+                
+                if (annotations.length === 0) {
+                    annotationsList.innerHTML = '<p>No annotations yet.</p>';
+                    return;
+                }
+                
+                annotations.forEach(anno => {
+                    const item = document.createElement('div');
+                    item.className = 'annotation-item';
+                    
+                    let details = '';
+                    switch (anno.type) {
+                        case 'rectangle':
+                            details = `
+                                <strong>Type:</strong> Rectangle<br>
+                                <strong>Position:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
+                                <strong>Size:</strong> ${Math.round(anno.width * 100)}% × ${Math.round(anno.height * 100)}%
+                            `;
+                            break;
+                        case 'triangle':
+                            details = `
+                                <strong>Type:</strong> Triangle<br>
+                                <strong>Position:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
+                                <strong>Size:</strong> ${Math.round(anno.width * 100)}% × ${Math.round(anno.height * 100)}%
+                            `;
+                            break;
+                        case 'circle':
+                            details = `
+                                <strong>Type:</strong> Circle<br>
+                                <strong>Center:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
+                                <strong>Radius:</strong> ${Math.round(anno.radius * 100)}%
+                            `;
+                            break;
+                        case 'line':
+                            details = `
+                                <strong>Type:</strong> Line<br>
+                                <strong>Start:</strong> (${Math.round(anno.x1 * 100)}%, ${Math.round(anno.y1 * 100)}%)<br>
+                                <strong>End:</strong> (${Math.round(anno.x2 * 100)}%, ${Math.round(anno.y2 * 100)}%)
+                            `;
+                            break;
+                        default:
+                            details = `<strong>Type:</strong> ${anno.type || 'Unknown'}`;
+                    }
+                    
+                    item.innerHTML = `
+                        <strong>Class:</strong> ${anno.class}<br>
+                        ${details}
+                    `;
+                    
+                    annotationsList.appendChild(item);
+                });
+            }
+            
+            // Set status message
+            function setStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'status-message';
+                
+                if (type) {
+                    statusMessage.classList.add(type);
+                }
+            }
+            
+            // Initialize the annotations list
+            updateAnnotationsList();
+        });
+    </script>
+</body>
+</html>
