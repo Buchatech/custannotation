@@ -36,6 +36,13 @@
             --triangle-color: #ff9800;  /* Orange */
             --triangle-fill: rgba(255, 152, 0, 0.2);
             --line-color: #f44336;  /* Red */
+            --marker-color: #FF5722;  /* Deep Orange */
+            --marker-fill: rgba(255, 87, 34, 0.2);
+            --comment-color: #4CAF50;  /* Green */
+            --comment-fill: rgba(76, 175, 80, 0.1);
+            --text-annotation-bg: rgba(255, 255, 255, 0.7);
+            --comment-bubble-bg: #E8F5E9;
+            --comment-bubble-border: #81C784;
         }
 
         .dark-theme {
@@ -68,6 +75,13 @@
             --triangle-color: #ff9800;  /* Orange */
             --triangle-fill: rgba(255, 152, 0, 0.2);
             --line-color: #f44336;  /* Red */
+            --marker-color: #FF9800;  /* Orange */
+            --marker-fill: rgba(255, 152, 0, 0.2);
+            --comment-color: #8BC34A;  /* Light Green */
+            --comment-fill: rgba(139, 195, 74, 0.1);
+            --text-annotation-bg: rgba(35, 35, 35, 0.7);
+            --comment-bubble-bg: #1B5E20;
+            --comment-bubble-border: #4CAF50;
         }
 
         body {
@@ -166,10 +180,74 @@
         .btn-green:hover {
             background-color: var(--btn-green-hover);
         }
+        /* Icon button styles for transparent backgrounds */
+        .btn-icon {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--input-border);
+            padding: 8px 12px;
+            font-size: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .btn-icon:hover {
+            background-color: rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .dark-theme .btn-icon:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .btn-icon.active {
+            border-color: var(--btn-primary);
+            box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.3);
+        }
+        .btn-icon::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--top-bar-bg);
+            color: var(--top-bar-text);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        .btn-icon:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Add a small triangle to the tooltip */
+        .btn-icon::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--top-bar-bg) transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        .btn-icon:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
         .btn-group {
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .form-group {
             margin-bottom: 15px;
@@ -286,12 +364,15 @@
                     <canvas id="canvas" width="800" height="600"></canvas>
                 </div>
                 <div class="btn-group">
-                    <button id="draw-rect" class="btn btn-green">Draw Box</button>
-                    <button id="draw-circle" class="btn btn-red">Draw Circle</button>
-                    <button id="draw-triangle" class="btn btn-green">Draw Triangle</button>
-                    <button id="draw-line" class="btn btn-red">Draw Line</button>
-                    <button id="delete-selected" class="btn btn-danger">Delete Selected</button>
-                    <button id="clear-all" class="btn btn-danger">Clear All</button>
+                    <button id="draw-rect" class="btn-icon" title="Draw Box" style="font-size: 28px; color: #2196F3;">□</button>
+                    <button id="draw-circle" class="btn-icon" title="Draw Circle">⭕</button>
+                    <button id="draw-triangle" class="btn-icon" title="Draw Triangle" style="color: #FF9800;">▲</button>
+                    <button id="draw-line" class="btn-icon" title="Draw Line" style="color: var(--btn-red);">─</button>
+                    <button id="add-marker" class="btn-icon" title="Add Marker">📍</button>
+                    <button id="add-text" class="btn-icon" title="Add Text" style="font-weight: bold;">A</button>
+                    <button id="add-comment" class="btn-icon" title="Add Comment">💬</button>
+                    <button id="delete-selected" class="btn-icon" title="Delete Selected">🗑️</button>
+                    <button id="clear-all" class="btn-icon" title="Clear All">♻️</button>
                 </div>
             </div>
             
@@ -415,7 +496,10 @@
             
             // Initialize Fabric.js canvas
             const canvas = new fabric.Canvas('canvas', {
-                selection: true
+                selection: true,
+                preserveObjectStacking: true,
+                selectionBorderColor: '#2196F3',
+                selectionLineWidth: 2
             });
             
             let drawingMode = false;
@@ -469,6 +553,9 @@
             document.getElementById('draw-circle').addEventListener('click', () => toggleDrawingMode('circle'));
             document.getElementById('draw-triangle').addEventListener('click', () => toggleDrawingMode('triangle'));
             document.getElementById('draw-line').addEventListener('click', () => toggleDrawingMode('line'));
+            document.getElementById('add-marker').addEventListener('click', () => toggleDrawingMode('marker'));
+            document.getElementById('add-text').addEventListener('click', () => toggleDrawingMode('text'));
+            document.getElementById('add-comment').addEventListener('click', () => toggleDrawingMode('comment'));
             deleteSelectedBtn.addEventListener('click', deleteSelected);
             clearAllBtn.addEventListener('click', clearAll);
             loadImageBtn.addEventListener('click', loadImage);
@@ -505,10 +592,13 @@
                         case 'circle': buttonId = 'draw-circle'; break;
                         case 'triangle': buttonId = 'draw-triangle'; break;
                         case 'line': buttonId = 'draw-line'; break;
+                        case 'marker': buttonId = 'add-marker'; break;
+                        case 'text': buttonId = 'add-text'; break;
+                        case 'comment': buttonId = 'add-comment'; break;
                     }
                     
                     if (buttonId) {
-                        document.getElementById(buttonId).textContent = `Cancel ${capitalizeFirstLetter(shape)}`;
+                        document.getElementById(buttonId).classList.add('active');
                     }
                     
                     canvas.selection = false;
@@ -516,17 +606,15 @@
                 }
             }
             
-            // Reset all draw buttons to their default text
+            // Reset all draw buttons to their default state
             function resetDrawButtons() {
-                document.getElementById('draw-rect').textContent = 'Draw Box';
-                document.getElementById('draw-circle').textContent = 'Draw Circle';
-                document.getElementById('draw-triangle').textContent = 'Draw Triangle';
-                document.getElementById('draw-line').textContent = 'Draw Line';
-            }
-            
-            // Helper function to capitalize first letter
-            function capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
+                document.getElementById('draw-rect').classList.remove('active');
+                document.getElementById('draw-circle').classList.remove('active');
+                document.getElementById('draw-triangle').classList.remove('active');
+                document.getElementById('draw-line').classList.remove('active');
+                document.getElementById('add-marker').classList.remove('active');
+                document.getElementById('add-text').classList.remove('active');
+                document.getElementById('add-comment').classList.remove('active');
             }
             
             // Mouse down event handler
@@ -548,7 +636,10 @@
                             stroke: '#2196F3',
                             strokeWidth: 2,
                             fill: 'rgba(33, 150, 243, 0.1)',
-                            selectable: true
+                            selectable: true,
+                            evented: true,
+                            hasControls: true,
+                            hasBorders: true
                         });
                         break;
                         
@@ -560,7 +651,10 @@
                             stroke: getComputedStyle(document.documentElement).getPropertyValue('--circle-color').trim(),
                             strokeWidth: 2,
                             fill: getComputedStyle(document.documentElement).getPropertyValue('--circle-fill').trim(),
-                            selectable: true
+                            selectable: true,
+                            evented: true,
+                            hasControls: true,
+                            hasBorders: true
                         });
                         break;
                         
@@ -573,7 +667,10 @@
                             stroke: getComputedStyle(document.documentElement).getPropertyValue('--triangle-color').trim(),
                             strokeWidth: 2,
                             fill: getComputedStyle(document.documentElement).getPropertyValue('--triangle-fill').trim(),
-                            selectable: true
+                            selectable: true,
+                            evented: true,
+                            hasControls: true,
+                            hasBorders: true
                         });
                         break;
                         
@@ -581,9 +678,170 @@
                         activeShape = new fabric.Line([startX, startY, startX, startY], {
                             stroke: getComputedStyle(document.documentElement).getPropertyValue('--line-color').trim(),
                             strokeWidth: 3,
-                            selectable: true
+                            selectable: true,
+                            evented: true,
+                            hasControls: true,
+                            hasBorders: true
                         });
                         break;
+                        
+                    case 'marker':
+                        // Create a marker (using just the icon without background)
+                        const markerIcon = new fabric.Text('📍', {
+                            left: startX - 8,
+                            top: startY - 8,
+                            fontSize: 24,
+                            selectable: true
+                        });
+                        
+                        // Use the icon as the active shape
+                        activeShape = markerIcon;
+                        
+                        // Immediately add to canvas as there's no resize for markers
+                        canvas.add(activeShape);
+                        
+                        // Prompt for marker label
+                        setTimeout(() => {
+                            const markerLabel = prompt('Enter marker label (optional):');
+                            if (markerLabel) {
+                                const label = new fabric.Text(markerLabel, {
+                                    left: startX + 15, 
+                                    top: startY - 10,
+                                    fontSize: 14,
+                                    fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+                                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--text-annotation-bg').trim(),
+                                    padding: 5
+                                });
+                                canvas.add(label);
+                                
+                                // Group marker with its label
+                                const markerGroup = new fabric.Group([activeShape, label], {
+                                    selectable: true
+                                });
+                                canvas.remove(activeShape);
+                                canvas.remove(label);
+                                canvas.add(markerGroup);
+                                activeShape = markerGroup;
+                            }
+                            
+                            // Add to annotations after getting the label
+                            const selectedClass = classSelect.value;
+                            const annotationId = Date.now().toString();
+                            
+                            // Store annotation data
+                            const annotation = {
+                                id: annotationId,
+                                class: selectedClass,
+                                type: 'marker',
+                                x: startX / canvas.width,
+                                y: startY / canvas.height,
+                                label: markerLabel || '',
+                                shape: activeShape
+                            };
+                            
+                            annotations.push(annotation);
+                            
+                            // Add data to the shape object for reference
+                            activeShape.id = annotationId;
+                            activeShape.class = selectedClass;
+                            activeShape.shapeType = 'marker';
+                            
+                            // Update annotations list in the sidebar
+                            updateAnnotationsList();
+                            
+                            // Turn off drawing mode
+                            activeShape = null;
+                            toggleDrawingMode(currentShape);
+                        }, 100);
+                        return; // Early return as we handle everything in the timeout
+                        
+                    case 'text':
+                        // Prompt for text content
+                        const textContent = prompt('Enter text:');
+                        if (textContent) {
+                            activeShape = new fabric.Textbox(textContent, {
+                                left: startX,
+                                top: startY,
+                                fontSize: 16,
+                                width: 200,
+                                fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--text-annotation-bg').trim(),
+                                padding: 5,
+                                selectable: true,
+                                editable: true
+                            });
+                            
+                            canvas.add(activeShape);
+                            
+                            // Add to annotations list
+                            const selectedClass = classSelect.value;
+                            const annotationId = Date.now().toString();
+                            
+                            // Store annotation data
+                            const annotation = {
+                                id: annotationId,
+                                class: selectedClass,
+                                type: 'text',
+                                x: startX / canvas.width,
+                                y: startY / canvas.height,
+                                text: textContent,
+                                shape: activeShape
+                            };
+                            
+                            annotations.push(annotation);
+                            
+                            // Add data to the shape object for reference
+                            activeShape.id = annotationId;
+                            activeShape.class = selectedClass;
+                            activeShape.shapeType = 'text';
+                            
+                            // Update annotations list in the sidebar
+                            updateAnnotationsList();
+                            
+                            // Turn off drawing mode
+                            activeShape = null;
+                            toggleDrawingMode(currentShape);
+                        }
+                        return; // Early return as we're done with text
+                        
+                    case 'comment':
+                        // Prompt for comment text
+                        const commentText = prompt('Enter comment:');
+                        if (commentText) {
+                            // Create comment bubble directly without icon
+                            activeShape = createCommentBubble(startX, startY, commentText);
+                            canvas.add(activeShape);
+                            
+                            // Add to annotations list
+                            const selectedClass = classSelect.value;
+                            const annotationId = Date.now().toString();
+                            
+                            // Store annotation data
+                            const annotation = {
+                                id: annotationId,
+                                class: selectedClass,
+                                type: 'comment',
+                                x: startX / canvas.width,
+                                y: startY / canvas.height,
+                                text: commentText,
+                                shape: activeShape
+                            };
+                            
+                            annotations.push(annotation);
+                            
+                            // Add data to the shape object for reference
+                            activeShape.id = annotationId;
+                            activeShape.class = selectedClass;
+                            activeShape.shapeType = 'comment';
+                            
+                            // Update annotations list in the sidebar
+                            updateAnnotationsList();
+                            
+                            // Turn off drawing mode
+                            activeShape = null;
+                            toggleDrawingMode(currentShape);
+                        }
+                        return; // Early return as we're done
                 }
                 
                 if (activeShape) {
@@ -786,7 +1044,22 @@
                 }
                 
                 activeShape = null;
-                toggleDrawingMode(currentShape); // Turn off the current drawing mode
+                // Turn off the current drawing mode
+                drawingMode = false;
+                currentShape = null;
+                resetDrawButtons();
+                
+                // Ensure selection is enabled after drawing
+                canvas.selection = true;
+                canvas.defaultCursor = 'default';
+                
+                // Make sure the object is selectable
+                canvas.forEachObject(function(obj) {
+                    obj.selectable = true;
+                    obj.evented = true;
+                });
+                
+                canvas.renderAll();
             }
             
                             // Delete selected object
@@ -798,13 +1071,23 @@
                     return;
                 }
                 
-                if (activeObject.id) {
+                // Find annotation by object reference or ID
+                let annotationToRemove;
+                for (let i = 0; i < annotations.length; i++) {
+                    if (annotations[i].shape === activeObject || 
+                        (activeObject.id && annotations[i].id === activeObject.id)) {
+                        annotationToRemove = annotations[i];
+                        break;
+                    }
+                }
+                
+                if (annotationToRemove) {
                     // Remove from annotations array
-                    annotations = annotations.filter(anno => anno.id !== activeObject.id);
+                    annotations = annotations.filter(anno => anno.id !== annotationToRemove.id);
                     
-                    // Remove label if exists
-                    if (activeObject.label) {
-                        canvas.remove(activeObject.label);
+                    // Remove label if exists separately from the group
+                    if (annotationToRemove.shape.label && !activeObject._objects) {
+                        canvas.remove(annotationToRemove.shape.label);
                     }
                     
                     // Remove the shape
@@ -815,6 +1098,10 @@
                     updateAnnotationsList();
                     
                     setStatus('Annotation deleted', 'success');
+                } else {
+                    canvas.remove(activeObject);
+                    canvas.renderAll();
+                    setStatus('Object deleted', 'success');
                 }
             }
             
@@ -1156,6 +1443,59 @@
             // Initialize the annotations list
             updateAnnotationsList();
         });
+
+        // Helper function to create comment bubbles
+        function createCommentBubble(x, y, text) {
+            const maxWidth = 200;
+            const padding = 10;
+            
+            // Create text object to measure dimensions
+            const textObj = new fabric.Text(text, {
+                fontSize: 14,
+                fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+                wordWrap: true,
+                width: maxWidth - (padding * 2)
+            });
+            
+            const width = Math.min(textObj.width + (padding * 2), maxWidth);
+            const height = textObj.height + (padding * 2);
+            
+            // Create background rounded rectangle
+            const bubble = new fabric.Rect({
+                left: x,
+                top: y,
+                width: width,
+                height: height,
+                rx: 10,
+                ry: 10,
+                fill: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-bg').trim(),
+                stroke: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-border').trim(),
+                strokeWidth: 1
+            });
+            
+            // Position text inside bubble
+            textObj.set({
+                left: x + padding,
+                top: y + padding
+            });
+            
+            // Create triangle pointer
+            const pointer = new fabric.Triangle({
+                left: x - 10,
+                top: y + 10,
+                width: 15,
+                height: 15,
+                fill: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-bg').trim(),
+                stroke: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-border').trim(),
+                strokeWidth: 1,
+                angle: 90
+            });
+            
+            // Group all elements
+            return new fabric.Group([bubble, pointer, textObj], {
+                selectable: true
+            });
+        }
     </script>
 </body>
 </html>
