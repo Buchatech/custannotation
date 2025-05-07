@@ -3,14 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roboflow Custom Annotator</title>
+    <title>Custom Annotator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --top-bar-bg: #673AB7;
+            --top-bar-text: #ffffff;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --btn-primary: #9C27B0;
+            --btn-primary-hover: #7B1FA2;
+            --btn-danger: #757575;
+            --btn-danger-hover: #616161;
+            --btn-secondary: #673AB7;
+            --btn-secondary-hover: #512DA8;
+            --btn-red: #e53935;
+            --btn-red-hover: #c62828;
+            --btn-green: #43a047;
+            --btn-green-hover: #2e7d32;
+            --input-border: #ddd;
+            --anno-item-bg: #f9f9f9;
+            --anno-item-border: #673AB7;
+            --success-bg: #E1BEE7;
+            --success-text: #4A148C;
+            --error-bg: #f2dede;
+            --error-text: #a94442;
+            --canvas-border: #ddd;
+            --circle-color: #ffeb3b;  /* Yellow */
+            --circle-fill: rgba(255, 235, 59, 0.2);
+            --triangle-color: #ff9800;  /* Orange */
+            --triangle-fill: rgba(255, 152, 0, 0.2);
+            --line-color: #f44336;  /* Red */
+        }
+
+        .dark-theme {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --top-bar-bg: #4A148C;
+            --top-bar-text: #ffffff;
+            --card-bg: #1e1e1e;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --btn-primary: #9C27B0;
+            --btn-primary-hover: #7B1FA2;
+            --btn-danger: #616161;
+            --btn-danger-hover: #424242;
+            --btn-secondary: #673AB7;
+            --btn-secondary-hover: #512DA8;
+            --btn-red: #e53935;
+            --btn-red-hover: #c62828;
+            --btn-green: #43a047;
+            --btn-green-hover: #2e7d32;
+            --input-border: #444;
+            --anno-item-bg: #2a2a2a;
+            --anno-item-border: #9C27B0;
+            --success-bg: #311B92;
+            --success-text: #E1BEE7;
+            --error-bg: #731c1c;
+            --error-text: #f5c6c6;
+            --canvas-border: #444;
+            --circle-color: #ffeb3b;  /* Yellow */
+            --circle-fill: rgba(255, 235, 59, 0.2);
+            --triangle-color: #ff9800;  /* Orange */
+            --triangle-fill: rgba(255, 152, 0, 0.2);
+            --line-color: #f44336;  /* Red */
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .container {
             max-width: 1200px;
@@ -23,14 +89,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            background-color: #4CAF50;
+            background-color: var(--top-bar-bg);
             padding: 10px 20px;
             border-radius: 8px;
-            color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: var(--top-bar-text);
+            box-shadow: 0 2px 5px var(--card-shadow);
         }
         h1 {
-            color: white;
+            color: var(--top-bar-text);
             margin: 0;
         }
         .content {
@@ -39,16 +105,16 @@
         }
         .canvas-container {
             flex: 1;
-            background-color: white;
+            background-color: var(--card-bg);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px var(--card-shadow);
             padding: 10px;
         }
         .sidebar {
             width: 300px;
-            background-color: white;
+            background-color: var(--card-bg);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px var(--card-shadow);
             padding: 20px;
         }
         .canvas-wrapper {
@@ -56,11 +122,11 @@
             margin-bottom: 20px;
         }
         canvas {
-            border: 1px solid #ddd;
+            border: 1px solid var(--canvas-border);
             display: block;
         }
         .btn {
-            background-color: #4CAF50;
+            background-color: var(--btn-primary);
             color: white;
             border: none;
             padding: 8px 16px;
@@ -74,19 +140,31 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #45a049;
+            background-color: var(--btn-primary-hover);
         }
         .btn-danger {
-            background-color: #f44336;
+            background-color: var(--btn-danger);
         }
         .btn-danger:hover {
-            background-color: #d32f2f;
+            background-color: var(--btn-danger-hover);
         }
         .btn-secondary {
-            background-color: #2196F3;
+            background-color: var(--btn-secondary);
         }
         .btn-secondary:hover {
-            background-color: #0b7dda;
+            background-color: var(--btn-secondary-hover);
+        }
+        .btn-red {
+            background-color: var(--btn-red);
+        }
+        .btn-red:hover {
+            background-color: var(--btn-red-hover);
+        }
+        .btn-green {
+            background-color: var(--btn-green);
+        }
+        .btn-green:hover {
+            background-color: var(--btn-green-hover);
         }
         .btn-group {
             display: flex;
@@ -100,28 +178,31 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: var(--btn-secondary);
         }
         input, select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--input-border);
             border-radius: 4px;
             box-sizing: border-box;
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
         .annotations-list {
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 1px solid var(--input-border);
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
         }
         .annotation-item {
-            background-color: #f9f9f9;
+            background-color: var(--anno-item-bg);
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 4px;
-            border-left: 4px solid #4CAF50;
+            border-left: 4px solid var(--anno-item-border);
         }
         .status-message {
             margin-top: 20px;
@@ -129,19 +210,74 @@
             border-radius: 4px;
         }
         .success {
-            background-color: #dff0d8;
-            color: #3c763d;
+            background-color: var(--success-bg);
+            color: var(--success-text);
         }
         .error {
-            background-color: #f2dede;
-            color: #a94442;
+            background-color: var(--error-bg);
+            color: var(--error-text);
+        }
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+        }
+        .theme-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .theme-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .theme-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .theme-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .theme-toggle-slider {
+            background-color: #2196F3;
+        }
+        input:checked + .theme-toggle-slider:before {
+            transform: translateX(30px);
+        }
+        .theme-icon {
+            margin: 0 10px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="top-bar">
-            <h1>Roboflow Custom Annotator</h1>
+            <h1>Custom Annotator</h1>
+            <div class="theme-toggle">
+                <span class="theme-icon">☀️</span>
+                <label class="theme-toggle-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="theme-toggle-slider"></span>
+                </label>
+                <span class="theme-icon">🌙</span>
+            </div>
         </div>
         
         <div class="content">
@@ -150,10 +286,10 @@
                     <canvas id="canvas" width="800" height="600"></canvas>
                 </div>
                 <div class="btn-group">
-                    <button id="draw-rect" class="btn">Draw Box</button>
-                    <button id="draw-circle" class="btn">Draw Circle</button>
-                    <button id="draw-triangle" class="btn">Draw Triangle</button>
-                    <button id="draw-line" class="btn">Draw Line</button>
+                    <button id="draw-rect" class="btn btn-green">Draw Box</button>
+                    <button id="draw-circle" class="btn btn-red">Draw Circle</button>
+                    <button id="draw-triangle" class="btn btn-green">Draw Triangle</button>
+                    <button id="draw-line" class="btn btn-red">Draw Line</button>
                     <button id="delete-selected" class="btn btn-danger">Delete Selected</button>
                     <button id="clear-all" class="btn btn-danger">Clear All</button>
                 </div>
@@ -227,11 +363,11 @@
                 <div class="form-group">
                     <label for="class-select">Object Class:</label>
                     <select id="class-select">
-                        <option value="person">Person</option>
-                        <option value="car">Car</option>
-                        <option value="dog">Dog</option>
-                        <option value="cat">Cat</option>
-                        <!-- Add more classes as needed -->
+                        <option value="perimeter">Perimeter</option>
+                        <option value="vent">Vent</option>
+                        <option value="valley">Valley</option>
+                        <option value="wall">Wall</option>
+                        <option value="water_issue">Water Issue</option>
                     </select>
                 </div>
                 
@@ -249,6 +385,34 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            // Check for saved theme preference or prefer-color-scheme
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const currentTheme = localStorage.getItem('theme');
+            
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggle.checked = true;
+            } else if (currentTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+                themeToggle.checked = false;
+            } else if (prefersDarkScheme.matches) {
+                document.body.classList.add('dark-theme');
+                themeToggle.checked = true;
+            }
+            
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
             // Initialize Fabric.js canvas
             const canvas = new fabric.Canvas('canvas', {
                 selection: true
@@ -393,9 +557,9 @@
                             left: startX,
                             top: startY,
                             radius: 0,
-                            stroke: '#2196F3',
+                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--circle-color').trim(),
                             strokeWidth: 2,
-                            fill: 'rgba(33, 150, 243, 0.1)',
+                            fill: getComputedStyle(document.documentElement).getPropertyValue('--circle-fill').trim(),
                             selectable: true
                         });
                         break;
@@ -406,16 +570,16 @@
                             top: startY,
                             width: 0,
                             height: 0,
-                            stroke: '#2196F3',
+                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--triangle-color').trim(),
                             strokeWidth: 2,
-                            fill: 'rgba(33, 150, 243, 0.1)',
+                            fill: getComputedStyle(document.documentElement).getPropertyValue('--triangle-fill').trim(),
                             selectable: true
                         });
                         break;
                         
                     case 'line':
                         activeShape = new fabric.Line([startX, startY, startX, startY], {
-                            stroke: '#2196F3',
+                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--line-color').trim(),
                             strokeWidth: 3,
                             selectable: true
                         });
