@@ -36,13 +36,7 @@
             --triangle-color: #ff9800;  /* Orange */
             --triangle-fill: rgba(255, 152, 0, 0.2);
             --line-color: #f44336;  /* Red */
-            --marker-color: #FF5722;  /* Deep Orange */
-            --marker-fill: rgba(255, 87, 34, 0.2);
-            --comment-color: #4CAF50;  /* Green */
-            --comment-fill: rgba(76, 175, 80, 0.1);
-            --text-annotation-bg: rgba(255, 255, 255, 0.7);
-            --comment-bubble-bg: #E8F5E9;
-            --comment-bubble-border: #81C784;
+            --rotate-hint-color: rgba(156, 39, 176, 0.5);  /* Purple with transparency */
         }
 
         .dark-theme {
@@ -75,13 +69,7 @@
             --triangle-color: #ff9800;  /* Orange */
             --triangle-fill: rgba(255, 152, 0, 0.2);
             --line-color: #f44336;  /* Red */
-            --marker-color: #FF9800;  /* Orange */
-            --marker-fill: rgba(255, 152, 0, 0.2);
-            --comment-color: #8BC34A;  /* Light Green */
-            --comment-fill: rgba(139, 195, 74, 0.1);
-            --text-annotation-bg: rgba(35, 35, 35, 0.7);
-            --comment-bubble-bg: #1B5E20;
-            --comment-bubble-border: #4CAF50;
+            --rotate-hint-color: rgba(171, 71, 188, 0.5);  /* Lighter purple with transparency */
         }
 
         body {
@@ -180,77 +168,50 @@
         .btn-green:hover {
             background-color: var(--btn-green-hover);
         }
-        /* Icon button styles for transparent backgrounds */
-        .btn-icon {
-            background-color: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--input-border);
-            padding: 8px 12px;
-            font-size: 18px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .btn-icon:hover {
-            background-color: rgba(0,0,0,0.05);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-        }
-        .dark-theme .btn-icon:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        .btn-icon.active {
-            border-color: var(--btn-primary);
-            box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.3);
-        }
-        .btn-icon::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--top-bar-bg);
-            color: var(--top-bar-text);
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-            z-index: 100;
-        }
-        .btn-icon:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-        /* Add a small triangle to the tooltip */
-        .btn-icon::before {
-            content: '';
-            position: absolute;
-            bottom: 115%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--top-bar-bg) transparent transparent transparent;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-            z-index: 100;
-        }
-        .btn-icon:hover::before {
-            opacity: 1;
-            visibility: visible;
-        }
         .btn-group {
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
         .form-group {
             margin-bottom: 15px;
+        }
+        #class-icon-toolbar {
+            display: flex;
+            gap: 6px;
+        }
+        .class-icon-button {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            box-sizing: border-box;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 4px;
+        }
+        .class-icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+        .class-icon-button:hover {
+            border-color: var(--btn-primary-hover);
+            transform: translateY(-1px);
+            background-color: var(--bg-color);
+        }
+        .class-icon-button.active-icon {
+            border-color: var(--btn-primary);
+            background-color: var(--btn-secondary-hover);
+            box-shadow: 0 0 8px var(--btn-primary);
+            transform: scale(1.05);
+        }
+        .class-icon-button.active-icon svg {
+            stroke: white;
+            fill: white;
         }
         label {
             display: block;
@@ -342,6 +303,45 @@
             margin: 0 10px;
             font-size: 18px;
         }
+
+        /* New styles for floating toolbar */
+        .floating-toolbar {
+            position: absolute;
+            top: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--card-shadow);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background-color: var(--input-border);
+            margin: 0 4px;
+        }
+        /* Ensure action buttons in toolbar also use SVG color correctly */
+        /* REMOVED: .floating-toolbar .class-icon-button svg { stroke: var(--text-color); } */
+        /* REMOVED: .floating-toolbar .class-icon-button:hover svg { stroke: var(--btn-primary-hover); } */
+         /* Ensure active class icons in toolbar have white SVGs */
+         /* This rule might be redundant if the general .class-icon-button.active-icon svg is sufficient */
+
+        .sidebar-warning {
+            background-color: var(--error-bg); 
+            color: var(--error-text);
+            padding: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--error-text); 
+        }
     </style>
 </head>
 <body>
@@ -361,98 +361,45 @@
         <div class="content">
             <div class="canvas-container">
                 <div class="canvas-wrapper">
-                    <canvas id="canvas" width="800" height="600"></canvas>
-                </div>
-                <div class="btn-group">
-                    <button id="draw-rect" class="btn-icon" title="Draw Box" style="font-size: 28px; color: #2196F3;">□</button>
-                    <button id="draw-circle" class="btn-icon" title="Draw Circle">⭕</button>
-                    <button id="draw-triangle" class="btn-icon" title="Draw Triangle" style="color: #FF9800;">▲</button>
-                    <button id="draw-line" class="btn-icon" title="Draw Line" style="color: var(--btn-red);">─</button>
-                    <button id="add-marker" class="btn-icon" title="Add Marker">📍</button>
-                    <button id="add-text" class="btn-icon" title="Add Text" style="font-weight: bold;">A</button>
-                    <button id="add-comment" class="btn-icon" title="Add Comment">💬</button>
-                    <button id="delete-selected" class="btn-icon" title="Delete Selected">🗑️</button>
-                    <button id="clear-all" class="btn-icon" title="Clear All">♻️</button>
+                    <!-- Floating Toolbar -->
+                    <div class="floating-toolbar">
+                         <div id="dynamic-class-icons-toolbar" style="display: flex; align-items: center; gap: 6px;">
+                            <button id="select-mode-btn" class="class-icon-button active-icon" title="Select Tool">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97l2.51-7.39l7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                            </button>
+                             <div id="class-icons-host" style="display: flex; gap: 6px;">
+                                 <!-- Class icons will be dynamically populated here by JavaScript -->
+                             </div>
+                             <div class="toolbar-separator"></div>
+                             <button id="delete-selected" class="btn btn-danger class-icon-button" title="Delete Selected">
+                                 <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                             </button>
+                             <button id="clear-all" class="btn btn-danger class-icon-button" title="Clear All">
+                                 <svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M5.7 5.7l12.6 12.6" /></svg>
+                             </button>
+                         </div>
+                     </div>
+                     <canvas id="canvas" width="800" height="600"></canvas>
                 </div>
             </div>
             
             <div class="sidebar">
-                <div class="form-group">
-                    <label for="image-source">Image Source:</label>
-                    <select id="image-source">
-                        <option value="roboflow">Roboflow Dataset</option>
-                        <option value="local">Local Computer</option>
-                        <option value="url">URL / API Endpoint</option>
-                        <option value="cloud">Cloud Storage</option>
-                    </select>
-                </div>
-                
-                <!-- Roboflow fields -->
-                <div id="roboflow-fields">
-                    <div class="form-group">
-                        <label for="api-key">Roboflow API Key:</label>
-                        <input type="text" id="api-key" placeholder="Enter your Roboflow API key">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="dataset-id">Dataset ID:</label>
-                        <input type="text" id="dataset-id" placeholder="Enter dataset ID">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="image-id">Image ID:</label>
-                        <input type="text" id="image-id" placeholder="Enter image ID">
-                    </div>
-                </div>
-                
-                <!-- URL fields -->
-                <div id="url-fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="image-url">Image URL:</label>
-                        <input type="text" id="image-url" placeholder="Enter image URL">
-                    </div>
-                </div>
+                <!-- Removed Image Source dropdown -->
                 
                 <!-- Local file upload -->
-                <div id="local-fields" style="display: none;">
+                <div id="local-fields">
                     <div class="form-group">
-                        <label for="local-file">Choose File:</label>
+                        <label for="local-file">Choose Image File:</label>
                         <input type="file" id="local-file" accept="image/*">
                     </div>
                 </div>
                 
-                <!-- Cloud storage options -->
-                <div id="cloud-fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="cloud-provider">Cloud Provider:</label>
-                        <select id="cloud-provider">
-                            <option value="dropbox">Dropbox</option>
-                            <option value="onedrive">OneDrive</option>
-                            <option value="gdrive">Google Drive</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button id="connect-cloud" class="btn btn-secondary">Connect to Cloud</button>
-                    </div>
-                    <div id="cloud-status" class="status-message"></div>
-                </div>
+                <!-- Removed Load Image button -->
                 
-                <div class="btn-group">
-                    <button id="load-image" class="btn btn-secondary">Load Image</button>
-                </div>
+                <!-- Object Class selection - Removed from here -->
                 
                 <div class="form-group">
-                    <label for="class-select">Object Class:</label>
-                    <select id="class-select">
-                        <option value="perimeter">Perimeter</option>
-                        <option value="vent">Vent</option>
-                        <option value="valley">Valley</option>
-                        <option value="wall">Wall</option>
-                        <option value="water_issue">Water Issue</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
+                    <div class="sidebar-warning"><strong>Note:</strong> For best results, ensure the 'Perimeter' annotation is drawn last.</div>
                     <label>Annotations:</label>
                     <div class="annotations-list" id="annotations-list"></div>
                 </div>
@@ -496,10 +443,19 @@
             
             // Initialize Fabric.js canvas
             const canvas = new fabric.Canvas('canvas', {
-                selection: true,
-                preserveObjectStacking: true,
-                selectionBorderColor: '#2196F3',
-                selectionLineWidth: 2
+                selection: true
+            });
+            
+            // Set control style for all objects (especially for rotation control)
+            fabric.Object.prototype.set({
+                transparentCorners: false,
+                cornerColor: '#ffffff',
+                cornerStrokeColor: '#9C27B0', // Use primary button color
+                cornerStyle: 'circle',
+                cornerSize: 10,
+                padding: 5,
+                rotatingPointOffset: 30, // Increased distance for rotation control
+                borderColor: '#9C27B0'   // Highlight border color
             });
             
             let drawingMode = false;
@@ -517,552 +473,510 @@
             const apiKeyInput = document.getElementById('api-key');
             const datasetIdInput = document.getElementById('dataset-id');
             const imageIdInput = document.getElementById('image-id');
-            const classSelect = document.getElementById('class-select');
+            const classIconsHost = document.getElementById('class-icons-host'); // New host for dynamic class icons
+            const selectModeBtn = document.getElementById('select-mode-btn'); // New select button
             const annotationsList = document.getElementById('annotations-list');
             const statusMessage = document.getElementById('status-message');
-            const imageSourceSelect = document.getElementById('image-source');
             const localFileInput = document.getElementById('local-file');
-            const imageUrlInput = document.getElementById('image-url');
-            const cloudProviderSelect = document.getElementById('cloud-provider');
-            const connectCloudBtn = document.getElementById('connect-cloud');
             
             // Source selection fields
             const sourceFields = {
-                roboflow: document.getElementById('roboflow-fields'),
                 local: document.getElementById('local-fields'),
-                url: document.getElementById('url-fields'),
-                cloud: document.getElementById('cloud-fields')
+            };
+
+            // Class configuration: shape and color
+            const classConfig = {
+                perimeter: { 
+                    shape: 'polygon', stroke: '#FF0000', fill: 'transparent', 
+                    displayName: 'Perimeter', 
+                    iconSvg: '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8v-2a2 2 0 0 1 2 -2h2" /><path d="M4 16v2a2 2 0 0 0 2 2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M16 20h2a2 2 0 0 0 2 -2v-2" /><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /></svg>'
+                },
+                vent: { 
+                    shape: 'rectangle', stroke: '#0000FF', fill: 'rgba(0, 0, 255, 0.2)', 
+                    displayName: 'Vent', 
+                    iconSvg: '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" /><path d="M9 12l6 0" /><path d="M12 9l0 6" /></svg>'
+                },
+                valley: { 
+                    shape: 'polygon', stroke: '#00FF00', fill: 'rgba(0, 255, 0, 0.2)', 
+                    displayName: 'Valley', 
+                    iconSvg: '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12l18 0" /></svg>'
+                },
+                vertical_wall: { 
+                    shape: 'polygon', stroke: '#FFA500', fill: 'rgba(255, 165, 0, 0.2)', 
+                    displayName: 'Wall', 
+                    iconSvg: '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 4h8" /><path d="M8 20h8" /><path d="M12 4v16" /></svg>'
+                },
+                ridges: { 
+                    shape: 'polygon', stroke: '#A52A2A', fill: 'rgba(165, 42, 42, 0.2)', 
+                    displayName: 'Ridge', 
+                    iconSvg: '<svg viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12l4 -4l4 4l4 -4l4 4l4 -4" /></svg>'
+                }
             };
             
-            // Handle changing image source type
-            imageSourceSelect.addEventListener('change', function() {
-                // Hide all source fields
-                Object.values(sourceFields).forEach(field => {
-                    field.style.display = 'none';
-                });
-                
-                // Show the selected source fields
-                const selectedSource = this.value;
-                if (sourceFields[selectedSource]) {
-                    sourceFields[selectedSource].style.display = 'block';
-                }
-            });
+            let currentDrawingConfig = null; 
+            let currentSelectedClass = null; 
+            let isDrawingPolygon = false;
+            let currentPolygonPoints = [];
+            let tempPolygonPreview = null; 
+            let currentPolygonPointHandles = []; // To store Fabric objects for point handles
+            let tempRubberBandLine = null; // For the live preview line to the cursor
+
+            if (sourceFields.local) { // Ensure local file input is always visible
+                sourceFields.local.style.display = 'block';
+            }
             
-            // Button event listeners
-            drawRectBtn.addEventListener('click', () => toggleDrawingMode('rectangle'));
-            document.getElementById('draw-circle').addEventListener('click', () => toggleDrawingMode('circle'));
-            document.getElementById('draw-triangle').addEventListener('click', () => toggleDrawingMode('triangle'));
-            document.getElementById('draw-line').addEventListener('click', () => toggleDrawingMode('line'));
-            document.getElementById('add-marker').addEventListener('click', () => toggleDrawingMode('marker'));
-            document.getElementById('add-text').addEventListener('click', () => toggleDrawingMode('text'));
-            document.getElementById('add-comment').addEventListener('click', () => toggleDrawingMode('comment'));
             deleteSelectedBtn.addEventListener('click', deleteSelected);
             clearAllBtn.addEventListener('click', clearAll);
-            loadImageBtn.addEventListener('click', loadImage);
             saveAnnotationsBtn.addEventListener('click', saveAnnotations);
-            connectCloudBtn.addEventListener('click', connectToCloudStorage);
+            selectModeBtn.addEventListener('click', function() { // Listener for the new select button
+                setModeForSelectedClass(null);
+            });
             
-            // File input listener
             localFileInput.addEventListener('change', handleLocalFileSelect);
             
-            // Canvas event listeners for drawing rectangles
+            // Function to render class icons
+            function renderClassIcons() {
+                classIconsHost.innerHTML = ''; // Clear existing icons from the host
+                Object.keys(classConfig).forEach(key => {
+                    const classInfo = classConfig[key];
+                    const iconButton = document.createElement('div');
+                    iconButton.className = 'class-icon-button';
+                    iconButton.innerHTML = classInfo.iconSvg; // Use SVG for icon
+                    iconButton.style.color = classInfo.stroke; // SVG will use this for stroke/fill via currentColor
+                    iconButton.title = classInfo.displayName || key;
+                    iconButton.dataset.classKey = key;
+
+                    iconButton.addEventListener('click', function() {
+                        const clickedClassKey = this.dataset.classKey;
+                        if (this.classList.contains('active-icon')) {
+                            // If already active, deselect and go to select mode
+                            setModeForSelectedClass(null);
+                        } else {
+                            currentSelectedClass = clickedClassKey; // Set before calling
+                            setModeForSelectedClass(clickedClassKey);
+                        }
+                    });
+                    classIconsHost.appendChild(iconButton); // Append to the correct host
+                });
+            }
+            
+            // Call renderClassIcons on DOMContentLoaded
+            renderClassIcons();
+
+            // Function to set mode based on class selection (now takes className directly)
+            function setModeForSelectedClass(className) {
+                currentSelectedClass = className; // Update global tracker
+
+                // Update active state of icons
+                selectModeBtn.classList.remove('active-icon');
+                Array.from(classIconsHost.children).forEach(btn => {
+                    btn.classList.remove('active-icon');
+                });
+
+                if (className && classConfig[className]) {
+                    const classButton = classIconsHost.querySelector(`[data-class-key="${className}"]`);
+                    if (classButton) {
+                        classButton.classList.add('active-icon');
+                    }
+
+                    currentDrawingConfig = classConfig[className];
+                    currentShape = currentDrawingConfig.shape; 
+                    drawingMode = true; 
+
+                    // Clear previous polygon drawing artifacts if any
+                    if (tempPolygonPreview) canvas.remove(tempPolygonPreview);
+                    tempPolygonPreview = null;
+                    if (tempRubberBandLine) canvas.remove(tempRubberBandLine);
+                    tempRubberBandLine = null;
+                    currentPolygonPointHandles.forEach(handle => canvas.remove(handle));
+                    currentPolygonPointHandles = [];
+                    currentPolygonPoints = [];
+
+                    if (currentShape === 'polygon') {
+                        isDrawingPolygon = true; // Set this flag only when starting a polygon for this class
+                        canvas.selection = false;
+                        canvas.defaultCursor = 'crosshair';
+                        setStatus(`Draw ${classConfig[className]?.displayName}: Click to add points. Click the first point (white square) to close & finish.`, 'success');
+                    } else {
+                        isDrawingPolygon = false; 
+                        canvas.selection = false; // Disable selection for drawing other shapes
+                        canvas.defaultCursor = 'crosshair';
+                        
+                        // Add special instructions for rectangles
+                        if (currentShape === 'rectangle') {
+                            setStatus(`Drawing mode: ${classConfig[className]?.displayName} (${currentShape}). After drawing, you can rotate the rectangle using the rotation control.`, 'success');
+                        } else {
+                            setStatus(`Drawing mode: ${classConfig[className]?.displayName} (${currentShape})`, 'success');
+                        }
+                    }
+                } else { // Selection mode (className is null or invalid)
+                    currentSelectedClass = null; // Ensure this is explicit for selection mode
+                    drawingMode = false;
+                    isDrawingPolygon = false;
+                    currentDrawingConfig = null;
+                    currentShape = null;
+
+                    selectModeBtn.classList.add('active-icon'); // Activate select button
+
+                    if (tempPolygonPreview) canvas.remove(tempPolygonPreview);
+                    tempPolygonPreview = null;
+                    if (tempRubberBandLine) canvas.remove(tempRubberBandLine);
+                    tempRubberBandLine = null;
+                    currentPolygonPointHandles.forEach(handle => canvas.remove(handle));
+                    currentPolygonPointHandles = [];
+                    currentPolygonPoints = [];
+                    canvas.selection = true; // Enable selection
+                    canvas.defaultCursor = 'default';
+                    if (annotations.length === 0 && !window.currentImage) {
+                         setStatus('Selection mode. Load an image, then click a class icon to draw.', '');
+                    } else if (annotations.length === 0 && window.currentImage) {
+                         setStatus('Selection mode. Click a class icon to draw annotations.', '');
+                    } else {
+                         setStatus('Selection mode. Select an object or click a class icon to draw more.', '');
+                    }
+                }
+            }
+
+            // Initialize mode on page load based on the default (empty) class selection
+            setModeForSelectedClass(null); // Initial call with no class selected (Select mode active)
+
             canvas.on('mouse:down', onMouseDown);
             canvas.on('mouse:move', onMouseMove);
             canvas.on('mouse:up', onMouseUp);
+            canvas.on('mouse:dblclick', onMouseDblClick); // Added for finishing polygons
+            canvas.on('object:modified', onObjectModified); // Add listener for object modifications
+            canvas.on('selection:created', onObjectSelected); // Add listener for object selection
+            canvas.on('selection:updated', onObjectSelected); // When selection changes between objects
+            canvas.on('selection:cleared', onSelectionCleared); // When selection is cleared
             
-            // Toggle drawing mode
-            function toggleDrawingMode(shape) {
-                // If already in drawing mode with the same shape, turn it off
-                if (drawingMode && currentShape === shape) {
-                    drawingMode = false;
-                    currentShape = null;
-                    resetDrawButtons();
-                    canvas.selection = true;
-                    canvas.defaultCursor = 'default';
-                } else {
-                    // Turn on drawing mode with the selected shape
-                    drawingMode = true;
-                    currentShape = shape;
-                    resetDrawButtons();
-                    
-                    // Highlight the active button
-                    let buttonId;
-                    switch(shape) {
-                        case 'rectangle': buttonId = 'draw-rect'; break;
-                        case 'circle': buttonId = 'draw-circle'; break;
-                        case 'triangle': buttonId = 'draw-triangle'; break;
-                        case 'line': buttonId = 'draw-line'; break;
-                        case 'marker': buttonId = 'add-marker'; break;
-                        case 'text': buttonId = 'add-text'; break;
-                        case 'comment': buttonId = 'add-comment'; break;
-                    }
-                    
-                    if (buttonId) {
-                        document.getElementById(buttonId).classList.add('active');
-                    }
-                    
-                    canvas.selection = false;
-                    canvas.defaultCursor = 'crosshair';
-                }
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
             }
             
-            // Reset all draw buttons to their default state
-            function resetDrawButtons() {
-                document.getElementById('draw-rect').classList.remove('active');
-                document.getElementById('draw-circle').classList.remove('active');
-                document.getElementById('draw-triangle').classList.remove('active');
-                document.getElementById('draw-line').classList.remove('active');
-                document.getElementById('add-marker').classList.remove('active');
-                document.getElementById('add-text').classList.remove('active');
-                document.getElementById('add-comment').classList.remove('active');
-            }
-            
-            // Mouse down event handler
             function onMouseDown(options) {
-                if (!drawingMode) return;
-                
+                if (!drawingMode || !currentDrawingConfig) return; 
+
                 const pointer = canvas.getPointer(options.e);
+                const currentClassName = currentSelectedClass; 
+
+                if (currentShape === 'polygon') {
+                    // If a rubber band line exists, remove it as this click finalizes its end point.
+                    if (tempRubberBandLine) {
+                        canvas.remove(tempRubberBandLine);
+                        tempRubberBandLine = null;
+                    }
+
+                    currentPolygonPoints.push({ x: pointer.x, y: pointer.y });
+
+                    const pointHandleSize = 8;
+                    const handle = new fabric.Rect({
+                        left: pointer.x - pointHandleSize / 2,
+                        top: pointer.y - pointHandleSize / 2,
+                        width: pointHandleSize,
+                        height: pointHandleSize,
+                        fill: 'white',
+                        stroke: 'black',
+                        strokeWidth: 1,
+                        selectable: false, 
+                        evented: true, // Make sure it can receive events
+                        objectCaching: false,
+                        isPolygonHandle: true,
+                        pointIndex: currentPolygonPoints.length - 1
+                    });
+
+                    handle.on('mousedown', function() { // Use mousedown as it's more immediate than click for this
+                        if (this.pointIndex === 0 && currentPolygonPoints.length >= 3) {
+                            completePolygonDrawing();
+                        } 
+                        // Else: clicking other handles does nothing for now, could enable point moving later
+                    });
+
+                    canvas.add(handle);
+                    currentPolygonPointHandles.push(handle);
+
+                    // Update the main polyline preview (committed lines)
+                    if (currentPolygonPoints.length > 1) {
+                        if (tempPolygonPreview) {
+                            canvas.remove(tempPolygonPreview); // Remove old preview
+                        }
+                        tempPolygonPreview = new fabric.Polyline(currentPolygonPoints, {
+                            stroke: currentDrawingConfig.stroke,
+                            fill: 'transparent', 
+                            strokeWidth: 2,
+                            selectable: false, evented: false,
+                            objectCaching: false
+                        });
+                        canvas.add(tempPolygonPreview);
+                    } else {
+                        // For the very first point, there's no polyline preview yet,
+                        // only the handle and the upcoming rubber-band line from mouseMove.
+                    }
+
+                    setStatus(`Added point ${currentPolygonPoints.length} for ${classConfig[currentClassName]?.displayName}. Click first point or double-click to finish.`);
+                    canvas.renderAll();
+                    return; 
+                }
+
+                // Logic for non-polygon shapes (rect, circle, line)
                 startX = pointer.x;
                 startY = pointer.y;
+                const config = currentDrawingConfig;
                 
-                // Create the appropriate shape based on current mode
-                switch (currentShape) {
+                switch (currentShape) { 
                     case 'rectangle':
                         activeShape = new fabric.Rect({
-                            left: startX,
-                            top: startY,
-                            width: 0,
-                            height: 0,
-                            stroke: '#2196F3',
-                            strokeWidth: 2,
-                            fill: 'rgba(33, 150, 243, 0.1)',
-                            selectable: true,
-                            evented: true,
-                            hasControls: true,
-                            hasBorders: true
+                            left: startX, top: startY, width: 0, height: 0,
+                            stroke: config.stroke, strokeWidth: 2, fill: config.fill, selectable: true,
+                            hasControls: true, transparentCorners: false, cornerColor: '#ffffff',
+                            cornerStrokeColor: config.stroke, cornerSize: 8, rotatingPointOffset: 25,
+                            cornerStyle: 'circle', rotatingPointOffset: 25
                         });
                         break;
-                        
                     case 'circle':
                         activeShape = new fabric.Circle({
-                            left: startX,
-                            top: startY,
-                            radius: 0,
-                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--circle-color').trim(),
-                            strokeWidth: 2,
-                            fill: getComputedStyle(document.documentElement).getPropertyValue('--circle-fill').trim(),
-                            selectable: true,
-                            evented: true,
-                            hasControls: true,
-                            hasBorders: true
+                            left: startX, top: startY, radius: 0,
+                            stroke: config.stroke, strokeWidth: 2, fill: config.fill, selectable: true,
+                            hasControls: true
                         });
                         break;
-                        
-                    case 'triangle':
-                        activeShape = new fabric.Triangle({
-                            left: startX,
-                            top: startY,
-                            width: 0,
-                            height: 0,
-                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--triangle-color').trim(),
-                            strokeWidth: 2,
-                            fill: getComputedStyle(document.documentElement).getPropertyValue('--triangle-fill').trim(),
-                            selectable: true,
-                            evented: true,
-                            hasControls: true,
-                            hasBorders: true
-                        });
-                        break;
-                        
                     case 'line':
                         activeShape = new fabric.Line([startX, startY, startX, startY], {
-                            stroke: getComputedStyle(document.documentElement).getPropertyValue('--line-color').trim(),
-                            strokeWidth: 3,
-                            selectable: true,
-                            evented: true,
-                            hasControls: true,
-                            hasBorders: true
+                            stroke: config.stroke, strokeWidth: 3, selectable: true,
+                            hasControls: true
                         });
                         break;
-                        
-                    case 'marker':
-                        // Create a marker (using just the icon without background)
-                        const markerIcon = new fabric.Text('📍', {
-                            left: startX - 8,
-                            top: startY - 8,
-                            fontSize: 24,
-                            selectable: true
-                        });
-                        
-                        // Use the icon as the active shape
-                        activeShape = markerIcon;
-                        
-                        // Immediately add to canvas as there's no resize for markers
-                        canvas.add(activeShape);
-                        
-                        // Prompt for marker label
-                        setTimeout(() => {
-                            const markerLabel = prompt('Enter marker label (optional):');
-                            if (markerLabel) {
-                                const label = new fabric.Text(markerLabel, {
-                                    left: startX + 15, 
-                                    top: startY - 10,
-                                    fontSize: 14,
-                                    fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
-                                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--text-annotation-bg').trim(),
-                                    padding: 5
-                                });
-                                canvas.add(label);
-                                
-                                // Group marker with its label
-                                const markerGroup = new fabric.Group([activeShape, label], {
-                                    selectable: true
-                                });
-                                canvas.remove(activeShape);
-                                canvas.remove(label);
-                                canvas.add(markerGroup);
-                                activeShape = markerGroup;
-                            }
-                            
-                            // Add to annotations after getting the label
-                            const selectedClass = classSelect.value;
-                            const annotationId = Date.now().toString();
-                            
-                            // Store annotation data
-                            const annotation = {
-                                id: annotationId,
-                                class: selectedClass,
-                                type: 'marker',
-                                x: startX / canvas.width,
-                                y: startY / canvas.height,
-                                label: markerLabel || '',
-                                shape: activeShape
-                            };
-                            
-                            annotations.push(annotation);
-                            
-                            // Add data to the shape object for reference
-                            activeShape.id = annotationId;
-                            activeShape.class = selectedClass;
-                            activeShape.shapeType = 'marker';
-                            
-                            // Update annotations list in the sidebar
-                            updateAnnotationsList();
-                            
-                            // Turn off drawing mode
-                            activeShape = null;
-                            toggleDrawingMode(currentShape);
-                        }, 100);
-                        return; // Early return as we handle everything in the timeout
-                        
-                    case 'text':
-                        // Prompt for text content
-                        const textContent = prompt('Enter text:');
-                        if (textContent) {
-                            activeShape = new fabric.Textbox(textContent, {
-                                left: startX,
-                                top: startY,
-                                fontSize: 16,
-                                width: 200,
-                                fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
-                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--text-annotation-bg').trim(),
-                                padding: 5,
-                                selectable: true,
-                                editable: true
-                            });
-                            
-                            canvas.add(activeShape);
-                            
-                            // Add to annotations list
-                            const selectedClass = classSelect.value;
-                            const annotationId = Date.now().toString();
-                            
-                            // Store annotation data
-                            const annotation = {
-                                id: annotationId,
-                                class: selectedClass,
-                                type: 'text',
-                                x: startX / canvas.width,
-                                y: startY / canvas.height,
-                                text: textContent,
-                                shape: activeShape
-                            };
-                            
-                            annotations.push(annotation);
-                            
-                            // Add data to the shape object for reference
-                            activeShape.id = annotationId;
-                            activeShape.class = selectedClass;
-                            activeShape.shapeType = 'text';
-                            
-                            // Update annotations list in the sidebar
-                            updateAnnotationsList();
-                            
-                            // Turn off drawing mode
-                            activeShape = null;
-                            toggleDrawingMode(currentShape);
-                        }
-                        return; // Early return as we're done with text
-                        
-                    case 'comment':
-                        // Prompt for comment text
-                        const commentText = prompt('Enter comment:');
-                        if (commentText) {
-                            // Create comment bubble directly without icon
-                            activeShape = createCommentBubble(startX, startY, commentText);
-                            canvas.add(activeShape);
-                            
-                            // Add to annotations list
-                            const selectedClass = classSelect.value;
-                            const annotationId = Date.now().toString();
-                            
-                            // Store annotation data
-                            const annotation = {
-                                id: annotationId,
-                                class: selectedClass,
-                                type: 'comment',
-                                x: startX / canvas.width,
-                                y: startY / canvas.height,
-                                text: commentText,
-                                shape: activeShape
-                            };
-                            
-                            annotations.push(annotation);
-                            
-                            // Add data to the shape object for reference
-                            activeShape.id = annotationId;
-                            activeShape.class = selectedClass;
-                            activeShape.shapeType = 'comment';
-                            
-                            // Update annotations list in the sidebar
-                            updateAnnotationsList();
-                            
-                            // Turn off drawing mode
-                            activeShape = null;
-                            toggleDrawingMode(currentShape);
-                        }
-                        return; // Early return as we're done
                 }
-                
-                if (activeShape) {
-                    canvas.add(activeShape);
-                    canvas.renderAll();
-                }
+                if (activeShape) canvas.add(activeShape).renderAll();
             }
             
-            // Mouse move event handler
             function onMouseMove(options) {
-                if (!drawingMode || !activeShape) return;
-                
+                if (!drawingMode || !currentDrawingConfig) return;
                 const pointer = canvas.getPointer(options.e);
+
+                if (isDrawingPolygon && currentPolygonPoints.length > 0) {
+                    if (tempRubberBandLine) {
+                        canvas.remove(tempRubberBandLine);
+                    }
+                    const lastPoint = currentPolygonPoints[currentPolygonPoints.length - 1];
+                    tempRubberBandLine = new fabric.Line([lastPoint.x, lastPoint.y, pointer.x, pointer.y], {
+                        stroke: currentDrawingConfig.stroke,
+                        strokeWidth: 2,
+                        strokeDashArray: [5, 5], // Dashed line for preview
+                        selectable: false,
+                        evented: false,
+                        objectCaching: false
+                    });
+                    canvas.add(tempRubberBandLine);
+                    canvas.renderAll();
+                    return; 
+                }
+
+                if (!activeShape) return; // Only proceed for non-polygon shapes if activeShape exists
                 
                 switch (currentShape) {
                     case 'rectangle':
-                        if (startX > pointer.x) {
-                            activeShape.set({ left: pointer.x });
-                        }
-                        
-                        if (startY > pointer.y) {
-                            activeShape.set({ top: pointer.y });
-                        }
-                        
                         activeShape.set({
+                            left: startX > pointer.x ? pointer.x : startX,
+                            top: startY > pointer.y ? pointer.y : startY,
                             width: Math.abs(pointer.x - startX),
                             height: Math.abs(pointer.y - startY)
                         });
                         break;
-                        
                     case 'circle':
-                        // Calculate radius based on mouse position
-                        const radius = Math.sqrt(
-                            Math.pow(pointer.x - startX, 2) + 
-                            Math.pow(pointer.y - startY, 2)
-                        ) / 2;
-                        
-                        // Calculate center point
-                        const centerX = (startX + pointer.x) / 2;
-                        const centerY = (startY + pointer.y) / 2;
-                        
+                        const radius = Math.sqrt(Math.pow(pointer.x - startX, 2) + Math.pow(pointer.y - startY, 2)) / 2;
                         activeShape.set({
-                            left: centerX - radius,
-                            top: centerY - radius,
+                            left: (startX + pointer.x) / 2 - radius,
+                            top: (startY + pointer.y) / 2 - radius,
                             radius: radius
                         });
                         break;
-                        
-                    case 'triangle':
-                        if (startX > pointer.x) {
-                            activeShape.set({ left: pointer.x });
-                        }
-                        
-                        if (startY > pointer.y) {
-                            activeShape.set({ top: pointer.y });
-                        }
-                        
-                        activeShape.set({
-                            width: Math.abs(pointer.x - startX),
-                            height: Math.abs(pointer.y - startY)
-                        });
-                        break;
-                        
                     case 'line':
-                        activeShape.set({
-                            x2: pointer.x,
-                            y2: pointer.y
-                        });
+                        activeShape.set({ x2: pointer.x, y2: pointer.y });
                         break;
                 }
-                
                 canvas.renderAll();
             }
             
-            // Mouse up event handler
             function onMouseUp() {
-                if (!drawingMode || !activeShape) return;
+                // For polygons, onMouseUp doesn't finalize the shape. That's handled by onMouseDblClick.
+                if (isDrawingPolygon || !drawingMode || !activeShape || !currentDrawingConfig) return;
                 
-                let isValidShape = true;
+                // This part is for non-polygon shapes (rectangle, circle)
+                let isValidShape = false;
                 let shapeData = {};
-                
-                // Check if shape is valid based on its type
-                switch (currentShape) {
+                const selectedClassValue = currentSelectedClass; // Use currentSelectedClass
+                // If classSelect.value is empty (e.g. "--Select Class--" is chosen), then currentDrawingConfig would be null.
+                // The initial check `!currentDrawingConfig` should prevent issues.
+                if (!selectedClassValue || !classConfig[selectedClassValue]) {
+                    //This case should ideally be caught by currentDrawingConfig being null
+                    canvas.remove(activeShape);
+                    activeShape = null;
+                    setStatus('Invalid class selected or no class selected.', 'error');
+                    return;
+                }
+                const config = currentDrawingConfig; // Relies on classSelect having a valid selected class
+
+                switch (currentShape) { // currentShape is derived from currentDrawingConfig.shape
                     case 'rectangle':
                         isValidShape = activeShape.width >= 5 && activeShape.height >= 5;
-                        
                         if (isValidShape) {
                             shapeData = {
-                                x: activeShape.left / canvas.width,
-                                y: activeShape.top / canvas.height,
+                                x: activeShape.left / canvas.width, // Top-left x before rotation
+                                y: activeShape.top / canvas.height, // Top-left y before rotation
                                 width: activeShape.width / canvas.width,
-                                height: activeShape.height / canvas.height
+                                height: activeShape.height / canvas.height,
+                                angle: activeShape.angle || 0 // Store the angle
                             };
                         }
                         break;
-                        
                     case 'circle':
                         isValidShape = activeShape.radius >= 3;
-                        
                         if (isValidShape) {
                             const centerX = activeShape.left + activeShape.radius;
                             const centerY = activeShape.top + activeShape.radius;
-                            
-                            shapeData = {
-                                x: centerX / canvas.width,
-                                y: centerY / canvas.height,
-                                radius: activeShape.radius / Math.max(canvas.width, canvas.height)
-                            };
+                            shapeData = { x: centerX / canvas.width, y: centerY / canvas.height, radius: activeShape.radius / Math.max(canvas.width, canvas.height) };
                         }
                         break;
-                        
-                    case 'triangle':
-                        isValidShape = activeShape.width >= 5 && activeShape.height >= 5;
-                        
-                        if (isValidShape) {
-                            shapeData = {
-                                x: activeShape.left / canvas.width,
-                                y: activeShape.top / canvas.height,
-                                width: activeShape.width / canvas.width,
-                                height: activeShape.height / canvas.height
-                            };
-                        }
-                        break;
-                        
                     case 'line':
-                        const lineLength = Math.sqrt(
-                            Math.pow(activeShape.x2 - activeShape.x1, 2) + 
-                            Math.pow(activeShape.y2 - activeShape.y1, 2)
-                        );
-                        
+                        const lineLength = Math.sqrt(Math.pow(activeShape.x2 - activeShape.x1, 2) + Math.pow(activeShape.y2 - activeShape.y1, 2));
                         isValidShape = lineLength >= 5;
-                        
-                        if (isValidShape) {
-                            shapeData = {
-                                x1: activeShape.x1 / canvas.width,
-                                y1: activeShape.y1 / canvas.height,
-                                x2: activeShape.x2 / canvas.width,
-                                y2: activeShape.y2 / canvas.height
-                            };
-                        }
+                        if (isValidShape) shapeData = { x1: activeShape.x1 / canvas.width, y1: activeShape.y1 / canvas.height, x2: activeShape.x2 / canvas.width, y2: activeShape.y2 / canvas.height };
                         break;
                 }
                 
                 if (!isValidShape) {
                     canvas.remove(activeShape);
+                    setStatus('Shape too small, not added.', 'error');
                 } else {
-                    // Add the annotation data
-                    const selectedClass = classSelect.value;
                     const annotationId = Date.now().toString();
-                    
-                    // Store annotation data
                     const annotation = {
-                        id: annotationId,
-                        class: selectedClass,
-                        type: currentShape,
-                        ...shapeData,
-                        shape: activeShape
+                        id: annotationId, class: selectedClassValue, type: currentShape, 
+                        color: config.stroke, // Store stroke color for identification
+                        ...shapeData, shape: activeShape
                     };
-                    
                     annotations.push(annotation);
                     
-                    // Add data to the shape object for reference
                     activeShape.id = annotationId;
-                    activeShape.class = selectedClass;
+                    activeShape.class = selectedClassValue;
                     activeShape.shapeType = currentShape;
                     
-                    // Add label to the shape
                     let labelLeft, labelTop;
-                    
+                    const labelText = selectedClassValue;
+                    const textPadding = 3;
+                    const textFontSize = 12;
+
                     switch (currentShape) {
                         case 'rectangle':
-                        case 'triangle':
                             labelLeft = activeShape.left;
-                            labelTop = activeShape.top - 15;
+                            labelTop = activeShape.top - textFontSize - (textPadding*2) < 0 ? activeShape.top + activeShape.height + textPadding : activeShape.top - textFontSize - (textPadding*2) -1 ;
                             break;
                         case 'circle':
-                            labelLeft = activeShape.left + activeShape.radius - 20;
-                            labelTop = activeShape.top - 15;
+                             const textWidth = labelText.length * (textFontSize / 2); // Approx width
+                            labelLeft = activeShape.left + activeShape.radius - textWidth / 2;
+                            labelTop = activeShape.top - textFontSize - (textPadding*2) < 0 ? activeShape.top + (activeShape.radius * 2) + textPadding : activeShape.top - textFontSize - (textPadding*2) -1;
                             break;
                         case 'line':
-                            labelLeft = (activeShape.x1 + activeShape.x2) / 2;
-                            labelTop = (activeShape.y1 + activeShape.y2) / 2 - 15;
+                            const midX = (activeShape.x1 + activeShape.x2) / 2;
+                            const midY = (activeShape.y1 + activeShape.y2) / 2;
+                            labelLeft = midX - (labelText.length * (textFontSize / 2) / 2);
+                            labelTop = midY - textFontSize - textPadding;
                             break;
                     }
                     
-                    const label = new fabric.Text(selectedClass, {
-                        left: labelLeft,
-                        top: labelTop,
-                        fontSize: 12,
-                        fill: '#fff',
-                        backgroundColor: '#2196F3',
-                        padding: 5
+                    const label = new fabric.Text(labelText, {
+                        left: labelLeft, top: labelTop, fontSize: textFontSize,
+                        fill: '#fff', backgroundColor: config.stroke, padding: textPadding,
+                        selectable: false, evented: false
                     });
-                    
                     canvas.add(label);
                     activeShape.label = label;
                     
-                    // Update annotations list in the sidebar
                     updateAnnotationsList();
+                    setStatus(`Annotation for ${selectedClassValue} added.`, 'success');
                 }
-                
                 activeShape = null;
-                // Turn off the current drawing mode
-                drawingMode = false;
-                currentShape = null;
-                resetDrawButtons();
-                
-                // Ensure selection is enabled after drawing
-                canvas.selection = true;
-                canvas.defaultCursor = 'default';
-                
-                // Make sure the object is selectable
-                canvas.forEachObject(function(obj) {
-                    obj.selectable = true;
-                    obj.evented = true;
+                // Keep drawing mode active for the selected class unless changed
+            }
+            
+            function onMouseDblClick(options) {
+                if (isDrawingPolygon && currentPolygonPoints.length >= 3) {
+                    completePolygonDrawing();
+                } 
+                // No specific action if not drawing polygon or not enough points for dbl click to finalize
+            }
+            
+            function completePolygonDrawing() {
+                if (!isDrawingPolygon || currentPolygonPoints.length < 3) {
+                    setStatus('Polygon needs at least 3 points.', 'error');
+                    return;
+                }
+
+                if (tempRubberBandLine) { // Ensure rubber band line is removed on completion
+                    canvas.remove(tempRubberBandLine);
+                    tempRubberBandLine = null;
+                }
+
+                canvas.remove(tempPolygonPreview); 
+                tempPolygonPreview = null;
+
+                currentPolygonPointHandles.forEach(handle => canvas.remove(handle));
+                currentPolygonPointHandles = [];
+
+                const currentClassName = currentSelectedClass;
+                const config = classConfig[currentClassName];
+
+                const finalPolygon = new fabric.Polygon(currentPolygonPoints, {
+                    stroke: config.stroke,
+                    strokeWidth: 2,
+                    fill: config.fill, 
+                    selectable: true,
+                    hasControls: true,
+                    objectCaching: false 
                 });
+
+                const annotationId = Date.now().toString();
+                const normalizedPoints = currentPolygonPoints.map(p => ({
+                    x: p.x / canvas.width,
+                    y: p.y / canvas.height
+                }));
+
+                const annotation = {
+                    id: annotationId,
+                    class: currentClassName,
+                    type: 'polygon',
+                    points: normalizedPoints, 
+                    color: config.stroke, 
+                    shape: finalPolygon
+                };
+                annotations.push(annotation);
+
+                finalPolygon.id = annotationId;
+                finalPolygon.class = currentClassName;
+                finalPolygon.shapeType = 'polygon';
+
+                let labelLeft = currentPolygonPoints[0].x;
+                let labelTop = currentPolygonPoints[0].y - 15;
+                if (labelTop < 0) labelTop = currentPolygonPoints[0].y + 5;
+
+                const label = new fabric.Text(config.displayName, {
+                    left: labelLeft, top: labelTop, fontSize: 12,
+                    fill: '#fff', backgroundColor: config.stroke, padding: 3,
+                    selectable: false, evented: false
+                });
+                canvas.add(finalPolygon).add(label);
+                finalPolygon.label = label;
+
+                updateAnnotationsList();
+                setStatus(`Polygon for ${config.displayName} added with ${currentPolygonPoints.length} points.`, 'success');
                 
+                isDrawingPolygon = false;
+                currentPolygonPoints = [];
+                // After completing a polygon, reset to selection mode for that class or global selection if needed
+                // For now, let current class selection persist, user can click another icon or deselect current
+                // setModeForSelectedClass(currentSelectedClass); // Re-affirm current class mode, or pass null for general selection mode
                 canvas.renderAll();
             }
             
-                            // Delete selected object
             function deleteSelected() {
                 const activeObject = canvas.getActiveObject();
                 
@@ -1071,23 +985,13 @@
                     return;
                 }
                 
-                // Find annotation by object reference or ID
-                let annotationToRemove;
-                for (let i = 0; i < annotations.length; i++) {
-                    if (annotations[i].shape === activeObject || 
-                        (activeObject.id && annotations[i].id === activeObject.id)) {
-                        annotationToRemove = annotations[i];
-                        break;
-                    }
-                }
-                
-                if (annotationToRemove) {
+                if (activeObject.id) {
                     // Remove from annotations array
-                    annotations = annotations.filter(anno => anno.id !== annotationToRemove.id);
+                    annotations = annotations.filter(anno => anno.id !== activeObject.id);
                     
-                    // Remove label if exists separately from the group
-                    if (annotationToRemove.shape.label && !activeObject._objects) {
-                        canvas.remove(annotationToRemove.shape.label);
+                    // Remove label if exists
+                    if (activeObject.label) {
+                        canvas.remove(activeObject.label);
                     }
                     
                     // Remove the shape
@@ -1098,14 +1002,9 @@
                     updateAnnotationsList();
                     
                     setStatus('Annotation deleted', 'success');
-                } else {
-                    canvas.remove(activeObject);
-                    canvas.renderAll();
-                    setStatus('Object deleted', 'success');
                 }
             }
             
-            // Clear all annotations
             function clearAll() {
                 canvas.clear();
                 annotations = [];
@@ -1124,85 +1023,6 @@
                 setStatus('All annotations cleared', 'success');
             }
             
-            // Load image from the selected source
-            function loadImage() {
-                const imageSource = imageSourceSelect.value;
-                
-                // Clear any previous status
-                setStatus('', '');
-                
-                switch (imageSource) {
-                    case 'roboflow':
-                        loadFromRoboflow();
-                        break;
-                    case 'url':
-                        loadFromUrl();
-                        break;
-                    case 'local':
-                        // Local file is already handled by the file input change event
-                        if (!localFileInput.files || localFileInput.files.length === 0) {
-                            setStatus('Please select a file first', 'error');
-                        }
-                        break;
-                    case 'cloud':
-                        loadFromCloud();
-                        break;
-                    default:
-                        setStatus('Please select a valid image source', 'error');
-                }
-            }
-            
-            // Load image from Roboflow API
-            function loadFromRoboflow() {
-                const apiKey = apiKeyInput.value;
-                const datasetId = datasetIdInput.value;
-                const imageId = imageIdInput.value;
-                
-                if (!apiKey || !datasetId || !imageId) {
-                    setStatus('Please provide API key, dataset ID and image ID', 'error');
-                    return;
-                }
-                
-                setStatus('Loading image from Roboflow...', '');
-                
-                // In a real implementation, you would use fetch
-                // Since this is just a demonstration, we'll use a placeholder image
-                const placeholderUrl = '/api/placeholder/800/600';
-                loadImageFromUrl(placeholderUrl);
-                
-                /* This would be the actual fetch code:
-                
-                fetch(`https://api.roboflow.com/dataset/${datasetId}/image/${imageId}?api_key=${apiKey}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to load image');
-                        }
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        loadImageFromUrl(url);
-                    })
-                    .catch(error => {
-                        setStatus('Error loading image: ' + error.message, 'error');
-                    });
-                */
-            }
-            
-            // Load image from URL or API endpoint
-            function loadFromUrl() {
-                const imageUrl = imageUrlInput.value;
-                
-                if (!imageUrl) {
-                    setStatus('Please enter an image URL', 'error');
-                    return;
-                }
-                
-                setStatus('Loading image from URL...', '');
-                loadImageFromUrl(imageUrl);
-            }
-            
-            // Handle file selection from local computer
             function handleLocalFileSelect(event) {
                 const file = event.target.files[0];
                 
@@ -1224,36 +1044,6 @@
                 reader.readAsDataURL(file);
             }
             
-            // Connect to cloud storage
-            function connectToCloudStorage() {
-                const provider = cloudProviderSelect.value;
-                
-                setStatus(`Connecting to ${provider}...`, '');
-                
-                // This is just a placeholder implementation
-                // In a real application, you would implement OAuth2 flow
-                setTimeout(() => {
-                    setStatus(`Connected to ${provider}. Please click "Load Image" to select a file.`, 'success');
-                    
-                    // Here you would typically show a file picker for the selected cloud provider
-                    // For this demo, we'll just use a placeholder
-                }, 1000);
-            }
-            
-            // Load from cloud storage (simplified demonstration)
-            function loadFromCloud() {
-                const provider = cloudProviderSelect.value;
-                
-                // Here you would typically show a file picker from the cloud provider's API
-                // For this demo, we'll just use a placeholder
-                setStatus(`Loading image from ${provider}...`, '');
-                
-                // Use a placeholder image
-                const placeholderUrl = '/api/placeholder/800/600';
-                loadImageFromUrl(placeholderUrl);
-            }
-            
-            // Common function to load an image from a URL
             function loadImageFromUrl(url) {
                 window.currentImage = url;
                 
@@ -1289,148 +1079,145 @@
                 }, { crossOrigin: 'anonymous' });
             }
             
-            // Save annotations to Roboflow
             function saveAnnotations() {
-                const apiKey = apiKeyInput.value;
-                const datasetId = datasetIdInput.value;
-                const imageId = imageIdInput.value;
+                const apiKey = apiKeyInput.value; // This is no longer used but kept in original func structure
+                const datasetId = datasetIdInput.value; // ditto
+                const imageId = imageIdInput.value; // ditto
                 
-                if (!apiKey || !datasetId || !imageId) {
-                    setStatus('Please provide API key, dataset ID and image ID', 'error');
-                    return;
-                }
+                // API key/Dataset ID check removed as they are not used for local saving
+                // if (!apiKey || !datasetId || !imageId) {
+                //     setStatus('Please provide API key, dataset ID and image ID', 'error');
+                //     return;
+                // }
                 
                 if (annotations.length === 0) {
                     setStatus('No annotations to save', 'error');
                     return;
                 }
                 
-                // Format the annotations for Roboflow
-                const formattedAnnotations = annotations.map(anno => {
-                    const baseAnnotation = {
-                        class: anno.class,
-                        type: anno.type
-                    };
-                    
-                    // Add shape-specific properties
+                // Format the annotations for YOLOv11-seg
+                const yoloFormattedAnnotations = annotations.map(anno => {
+                    const classIndex = Object.keys(classConfig).indexOf(anno.class); // Get class index
+                    if (classIndex === -1) {
+                        console.warn(`Class ${anno.class} not found in classConfig, skipping annotation ${anno.id}`);
+                        return null; // Skip if class is not recognized
+                    }
+
+                    let yoloString = `${classIndex}`;
+
                     switch (anno.type) {
                         case 'rectangle':
-                        case 'triangle':
-                            return {
-                                ...baseAnnotation,
-                                x: anno.x,
-                                y: anno.y,
-                                width: anno.width,
-                                height: anno.height
-                            };
+                            // For YOLO segmentation, all rectangles (rotated or not) are exported as 4-point polygons.
+                            const rectObj = anno.shape; // The fabric object
+                            const coords = rectObj.oCoords; // Get corner coordinates after transformations
+
+                            if (!coords) {
+                                console.warn(`Could not get oCoords for rectangle annotation ${anno.id}, skipping.`);
+                                return null;
+                            }
+
+                            // Order: tl, tr, br, bl (top-left, top-right, bottom-right, bottom-left)
+                            // Ensure these points are in a consistent order for polygon representation.
+                            yoloString += ` ${(coords.tl.x / canvas.width).toFixed(6)} ${(coords.tl.y / canvas.height).toFixed(6)}`;
+                            yoloString += ` ${(coords.tr.x / canvas.width).toFixed(6)} ${(coords.tr.y / canvas.height).toFixed(6)}`;
+                            yoloString += ` ${(coords.br.x / canvas.width).toFixed(6)} ${(coords.br.y / canvas.height).toFixed(6)}`;
+                            yoloString += ` ${(coords.bl.x / canvas.width).toFixed(6)} ${(coords.bl.y / canvas.height).toFixed(6)}`;
+                            break;
                         case 'circle':
-                            return {
-                                ...baseAnnotation,
-                                x: anno.x,
-                                y: anno.y,
-                                radius: anno.radius
-                            };
-                        case 'line':
-                            return {
-                                ...baseAnnotation,
-                                x1: anno.x1,
-                                y1: anno.y1,
-                                x2: anno.x2,
-                                y2: anno.y2
-                            };
+                            // Approximate circle with a polygon (e.g., 16-sided)
+                            const numSegments = 16;
+                            let circlePointsStr = '';
+                            for (let i = 0; i < numSegments; i++) {
+                                const angle = (i / numSegments) * 2 * Math.PI;
+                                const pointX = anno.x + anno.radius * Math.cos(angle); // anno.x is centerX, anno.radius is normalized
+                                const pointY = anno.y + anno.radius * Math.sin(angle); // anno.y is centerY
+                                circlePointsStr += ` ${pointX.toFixed(6)} ${pointY.toFixed(6)}`;
+                            }
+                            yoloString += circlePointsStr;
+                            break;
+                        case 'polygon':
+                            let polyPointsStr = '';
+                            anno.points.forEach(p => {
+                                polyPointsStr += ` ${p.x.toFixed(6)} ${p.y.toFixed(6)}`;
+                            });
+                            yoloString += polyPointsStr;
+                            break;
+                        // 'line' is not directly a YOLO segmentation shape unless treated as a thin polygon.
+                        // Current lines will be exported as polygons if their class maps to polygon.
+                        // If a class strictly maps to 'line' and needs different export, add case here.
                         default:
-                            return baseAnnotation;
+                            console.warn(`Unsupported annotation type for YOLO export: ${anno.type}, skipping.`);
+                            return null;
                     }
-                });
+                    return yoloString;
+                }).filter(Boolean); // Remove nulls from skipped annotations
                 
                 const payload = {
-                    annotations: formattedAnnotations
+                    // Define how you want to save: e.g., to a .txt file per image for YOLO
+                    // For now, displaying in status. In a real app, trigger a download.
+                    yoloAnnotations: yoloFormattedAnnotations.join('\n') // Each annotation on a new line
                 };
                 
-                // Display the payload in the status message for demonstration
-                setStatus('Annotations would be sent to Roboflow: ' + JSON.stringify(payload), 'success');
+                setStatus('YOLOv11-seg formatted annotations (see console for payload): ' + JSON.stringify(payload, null, 2), 'success');
+                console.log("YOLO Formatted Annotations Payload:", payload);
                 
-                /* This would be the actual fetch code:
-                
-                fetch(`https://api.roboflow.com/dataset/${datasetId}/image/${imageId}/annotation?api_key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to save annotations');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        setStatus('Annotations saved successfully', 'success');
-                    })
-                    .catch(error => {
-                        setStatus('Error saving annotations: ' + error.message, 'error');
-                    });
-                */
+                // Example for triggering download (you might need a library or more robust solution)
+                const filename = "annotations.txt";
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(payload.yoloAnnotations));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
             }
             
-            // Update the annotations list in the sidebar
             function updateAnnotationsList() {
                 annotationsList.innerHTML = '';
+                const defaultBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--anno-item-border').trim();
                 
                 if (annotations.length === 0) {
-                    annotationsList.innerHTML = '<p>No annotations yet.</p>';
+                    annotationsList.innerHTML = '<p>No annotations yet. Select a class to draw.</p>';
                     return;
                 }
                 
                 annotations.forEach(anno => {
                     const item = document.createElement('div');
                     item.className = 'annotation-item';
-                    
+                    const classColor = classConfig[anno.class]?.stroke || anno.color || defaultBorderColor;
+                    item.style.borderLeft = `4px solid ${classColor}`;
+
                     let details = '';
                     switch (anno.type) {
                         case 'rectangle':
-                            details = `
-                                <strong>Type:</strong> Rectangle<br>
-                                <strong>Position:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
-                                <strong>Size:</strong> ${Math.round(anno.width * 100)}% × ${Math.round(anno.height * 100)}%
-                            `;
+                            details = `<strong>Type:</strong> Rectangle<br>
+                                       <strong>Original Pos:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
+                                       <strong>Size:</strong> ${Math.round(anno.width * 100)}% × ${Math.round(anno.height * 100)}%`;
+                            if (anno.angle && Math.abs(anno.angle) > 0.1) { // Show angle if not negligible
+                                details += `<br><strong>Angle:</strong> ${Math.round(anno.angle)}°`;
+                            }
                             break;
-                        case 'triangle':
-                            details = `
-                                <strong>Type:</strong> Triangle<br>
-                                <strong>Position:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
-                                <strong>Size:</strong> ${Math.round(anno.width * 100)}% × ${Math.round(anno.height * 100)}%
-                            `;
+                        case 'polygon': // Updated to display polygon points count
+                            const pointsCount = anno.points ? anno.points.length : 0;
+                            details = `<strong>Type:</strong> Polygon<br><strong>Points:</strong> ${pointsCount}`;
+                            if (pointsCount > 0 && anno.points[0]){
+                                details += `<br><strong>Start:</strong> (${Math.round(anno.points[0].x * 100)}%, ${Math.round(anno.points[0].y * 100)}%)`;
+                            }
                             break;
                         case 'circle':
-                            details = `
-                                <strong>Type:</strong> Circle<br>
-                                <strong>Center:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br>
-                                <strong>Radius:</strong> ${Math.round(anno.radius * 100)}%
-                            `;
+                            details = `<strong>Type:</strong> Circle<br><strong>Center:</strong> (${Math.round(anno.x * 100)}%, ${Math.round(anno.y * 100)}%)<br><strong>Radius:</strong> ${Math.round(anno.radius * 100)}%`;
                             break;
                         case 'line':
-                            details = `
-                                <strong>Type:</strong> Line<br>
-                                <strong>Start:</strong> (${Math.round(anno.x1 * 100)}%, ${Math.round(anno.y1 * 100)}%)<br>
-                                <strong>End:</strong> (${Math.round(anno.x2 * 100)}%, ${Math.round(anno.y2 * 100)}%)
-                            `;
+                            details = `<strong>Type:</strong> Line<br><strong>Start:</strong> (${Math.round(anno.x1 * 100)}%, ${Math.round(anno.y1 * 100)}%)<br><strong>End:</strong> (${Math.round(anno.x2 * 100)}%, ${Math.round(anno.y2 * 100)}%)`;
                             break;
                         default:
                             details = `<strong>Type:</strong> ${anno.type || 'Unknown'}`;
                     }
-                    
-                    item.innerHTML = `
-                        <strong>Class:</strong> ${anno.class}<br>
-                        ${details}
-                    `;
-                    
+                    item.innerHTML = `<strong>Class:</strong> ${anno.class}<br>${details}`;
                     annotationsList.appendChild(item);
                 });
             }
             
-            // Set status message
             function setStatus(message, type) {
                 statusMessage.textContent = message;
                 statusMessage.className = 'status-message';
@@ -1440,62 +1227,107 @@
                 }
             }
             
-            // Initialize the annotations list
+            // Function to handle object selection
+            function onObjectSelected(options) {
+                const selectedObject = options.selected[0]; // Get first selected object
+                if (selectedObject && selectedObject.shapeType === 'rectangle') {
+                    setStatus(`Rectangle selected. Use the circular handle to rotate.`, 'success');
+                }
+            }
+            
+            // Function to handle selection cleared
+            function onSelectionCleared() {
+                // If there's a drawing mode active, revert to that message
+                if (drawingMode && currentDrawingConfig) {
+                    const currentClassName = currentSelectedClass;
+                    if (currentShape === 'rectangle') { // rectangle drawing has specific hint
+                        setStatus(`Drawing mode: ${classConfig[currentClassName]?.displayName} (rectangle). After drawing, you can rotate the rectangle.`, 'success');
+                    } else if (currentShape === 'polygon') {
+                        setStatus(`Draw ${classConfig[currentClassName]?.displayName}: Click to add points, double-click to finish.`, 'success');
+                    } else {
+                        setStatus(`Drawing mode: ${classConfig[currentClassName]?.displayName} (${currentShape})`, 'success');
+                    }
+                } else if (annotations.length === 0 && !window.currentImage) {
+                    setStatus('Selection mode. Load an image, then click a class icon to draw.', '');
+                } else if (annotations.length === 0 && window.currentImage) {
+                    setStatus('Selection mode. Click a class icon to draw annotations.', '');
+                } else {
+                    setStatus('Selection mode. Select an object or click a class icon to draw more.', '');
+                }
+            }
+            
+            // Function to update annotation data when objects are modified
+            function onObjectModified(options) {
+                const modifiedObject = options.target;
+                if (!modifiedObject || !modifiedObject.id) return;
+                
+                // Find the annotation that corresponds to this object
+                const annotation = annotations.find(anno => anno.id === modifiedObject.id);
+                if (!annotation) return;
+                
+                // Update the annotation data based on the type of object
+                switch (annotation.type) {
+                    case 'rectangle':
+                        annotation.x = modifiedObject.left / canvas.width;
+                        annotation.y = modifiedObject.top / canvas.height;
+                        annotation.width = modifiedObject.width / canvas.width;
+                        annotation.height = modifiedObject.height / canvas.height;
+                        annotation.angle = modifiedObject.angle || 0;
+                        
+                        // Update label position
+                        if (modifiedObject.label) {
+                            let labelLeft = modifiedObject.left;
+                            let labelTop = modifiedObject.top - 15;
+                            if (labelTop < 0) labelTop = modifiedObject.top + modifiedObject.height + 5;
+                            modifiedObject.label.set({
+                                left: labelLeft,
+                                top: labelTop
+                            });
+                        }
+                        break;
+                    case 'circle':
+                        // Update circle annotation data
+                        const centerX = modifiedObject.left + modifiedObject.radius;
+                        const centerY = modifiedObject.top + modifiedObject.radius;
+                        annotation.x = centerX / canvas.width;
+                        annotation.y = centerY / canvas.height;
+                        annotation.radius = modifiedObject.radius / Math.max(canvas.width, canvas.height);
+                        
+                        // Update label position
+                        if (modifiedObject.label) {
+                            const textWidth = modifiedObject.label.text.length * (12 / 2); // Approx width
+                            modifiedObject.label.set({
+                                left: centerX - textWidth / 2,
+                                top: centerY - modifiedObject.radius - 15
+                            });
+                        }
+                        break;
+                    case 'polygon':
+                        // Update polygon points
+                        if (modifiedObject.points) {
+                            annotation.points = modifiedObject.points.map(p => ({
+                                x: (modifiedObject.left + p.x) / canvas.width,
+                                y: (modifiedObject.top + p.y) / canvas.height
+                            }));
+                            
+                            // Update label position
+                            if (modifiedObject.label) {
+                                modifiedObject.label.set({
+                                    left: modifiedObject.left,
+                                    top: modifiedObject.top - 15
+                                });
+                            }
+                        }
+                        break;
+                }
+                
+                // Update the annotations list
+                updateAnnotationsList();
+                canvas.renderAll();
+            }
+            
             updateAnnotationsList();
         });
-
-        // Helper function to create comment bubbles
-        function createCommentBubble(x, y, text) {
-            const maxWidth = 200;
-            const padding = 10;
-            
-            // Create text object to measure dimensions
-            const textObj = new fabric.Text(text, {
-                fontSize: 14,
-                fill: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
-                wordWrap: true,
-                width: maxWidth - (padding * 2)
-            });
-            
-            const width = Math.min(textObj.width + (padding * 2), maxWidth);
-            const height = textObj.height + (padding * 2);
-            
-            // Create background rounded rectangle
-            const bubble = new fabric.Rect({
-                left: x,
-                top: y,
-                width: width,
-                height: height,
-                rx: 10,
-                ry: 10,
-                fill: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-bg').trim(),
-                stroke: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-border').trim(),
-                strokeWidth: 1
-            });
-            
-            // Position text inside bubble
-            textObj.set({
-                left: x + padding,
-                top: y + padding
-            });
-            
-            // Create triangle pointer
-            const pointer = new fabric.Triangle({
-                left: x - 10,
-                top: y + 10,
-                width: 15,
-                height: 15,
-                fill: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-bg').trim(),
-                stroke: getComputedStyle(document.documentElement).getPropertyValue('--comment-bubble-border').trim(),
-                strokeWidth: 1,
-                angle: 90
-            });
-            
-            // Group all elements
-            return new fabric.Group([bubble, pointer, textObj], {
-                selectable: true
-            });
-        }
     </script>
 </body>
 </html>
